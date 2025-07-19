@@ -1203,54 +1203,12 @@
                         throw new Error(`API request failed with status ${response.status}`);
                     }
 
-                    const data = await response.json();
+                   const data = await response.json();
 
 
-                    // const documentData = `
-                    //     {
-                    //         "text": "File upload successful. Please enter your query.",
-                    //         "menu": null,
-                    //         "form": null,
-                    //         "link": null,
-                    //         "type": "COMPLEX",
-                    //         "downloadablePath": null,
-                    //         "complex": {
-                    //             "metaData": {
-                    //                 "header": [
-                    //                     "fileName",
-                    //                     "fileUrl"
-                    //                 ],
-                    //                 "type": "DOCUMENT_UPLOAD_LIST"
-                    //             },
-                    //             "data": [
-                    //                 {
-                    //                     "fileName": "output.pdf",
-                    //                     "fileType": null,
-                    //                     "fileUrl": "https://buddyai-document.s3.amazonaws.com/rt56-gh89-6bg7-LTTS04-output.pdf",
-                    //                     "fileId": null
-                    //                 },
-                    //                  {
-                    //                     "fileName": "output1.pdf",
-                    //                     "fileType": null,
-                    //                     "fileUrl": "https://buddyai-document.s3.amazonaws.com/rt56-gh89-6bg7-LTTS04-output.pdf",
-                    //                     "fileId": null
-                    //                 },
-                    //                  {
-                    //                     "fileName": "output2.pdf",
-                    //                     "fileType": null,
-                    //                     "fileUrl": "https://buddyai-document.s3.amazonaws.com/rt56-gh89-6bg7-LTTS04-output.pdf",
-                    //                     "fileId": null
-                    //                 }
-                    //             ]
-                    //         },
-                    //         "uuId": "738f212b-9b02-48ca-b481-7d1e99bdb922",
-                    //         "requestId": "rt56-gh89-6bg7",
-                    //         "stateType": null
-                    //     }
-                    // `;
-
-                    // const data = JSON.parse(documentData); // Simulating API response for testing   
-                    // console.log('API Response:', data);
+                    
+                    // const data = JSON.parse(documentData1); // Simulating API response for testing   
+                    console.log('API Response:', data);
 
                     // Process the response
                     if (data) {
@@ -1434,6 +1392,15 @@
                             }, 100);
                         }                         
                         // "DOCUMENT_UPLOAD_LIST"
+                        } else if (data.type === "DOWNLOADABLE" && data.link) {
+                            // Handle downloadable link
+                            botResponseContent = `
+                                <div class="response-content">
+                                    <a href="${data.link}" class="response-download" download="${data.text || 'download'}">
+                                        Download: ${data.text || 'file'}
+                                    </a>
+                                </div>
+                            `;
                         }
 
                     
