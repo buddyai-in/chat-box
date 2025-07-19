@@ -14,6 +14,7 @@
       justify-content: center;
       align-items: center;
       flex-direction: column;
+      background-image: url('./banner-bg2.jpg');
     }
 
     button {
@@ -30,11 +31,19 @@
     button:hover {
       background-color: #0056b3;
     }
+
+    #btn-open-storage {
+      position: absolute;
+      top: 0%;
+      right: 1%;
+    }
   </style>
 </head>
 <body>
 
-  <button onclick="window.open('local-storage.html', '_blank')">Open Local Storage</button>
+  <img src="./buddyAi_v1.jpeg" alt="Logo" style="width: 5%;position: absolute;top: 2%;left: 8%"/>
+  <img src="./banner1.png" alt="Logo" style="width: 50%; height: 50%; "/>
+  <button id="btn-open-storage" onclick="window.open('local-storage.html', '_blank')">Open Local Storage</button>
   <script src="chat-widget.js"></script>
 
   <script>
