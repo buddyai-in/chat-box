@@ -832,12 +832,15 @@
                 this.requestId = this.generateRequestId();
                 this.uploadedFiles = [];
                 this.messageFeedback = {};
+                this.selectedDocumentFiles = [];
 
                 this.sId = localStorage.getItem('sid');
                 this.sdocumentIdId = localStorage.getItem('documentId');
                 // Configuration
-            this.chatApiEndpoint = 'https://dev.api.chat.buddyai.in/v2/api/'+this.sId+'/chat/';
-            this.docApiEndpoint = 'https://dev.api.chat.buddyai.in/v2/api/document/'+this.sId+'/chat/';
+                let env = localStorage.getItem('profile');
+                
+            this.chatApiEndpoint = 'https://'+env+'.api.chat.buddyai.in/v2/api/'+this.sId+'/chat/';
+            this.docApiEndpoint = 'https://'+ env+'api.chat.buddyai.in/v2/api/document/'+this.sId+'/chat/';
                 this.supportedFileTypes = {
                     image: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
                     video: ['video/mp4', 'video/webm', 'video/ogg'],
@@ -849,7 +852,7 @@
                 // Initialize state
 
                 const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-                if(isLoggedIn) {
+                if(true) {
                     // Initialize
                     this.init();
                 }
@@ -1201,8 +1204,53 @@
                     }
 
                     const data = await response.json();
+
+
+                    // const documentData = `
+                    //     {
+                    //         "text": "File upload successful. Please enter your query.",
+                    //         "menu": null,
+                    //         "form": null,
+                    //         "link": null,
+                    //         "type": "COMPLEX",
+                    //         "downloadablePath": null,
+                    //         "complex": {
+                    //             "metaData": {
+                    //                 "header": [
+                    //                     "fileName",
+                    //                     "fileUrl"
+                    //                 ],
+                    //                 "type": "DOCUMENT_UPLOAD_LIST"
+                    //             },
+                    //             "data": [
+                    //                 {
+                    //                     "fileName": "output.pdf",
+                    //                     "fileType": null,
+                    //                     "fileUrl": "https://buddyai-document.s3.amazonaws.com/rt56-gh89-6bg7-LTTS04-output.pdf",
+                    //                     "fileId": null
+                    //                 },
+                    //                  {
+                    //                     "fileName": "output1.pdf",
+                    //                     "fileType": null,
+                    //                     "fileUrl": "https://buddyai-document.s3.amazonaws.com/rt56-gh89-6bg7-LTTS04-output.pdf",
+                    //                     "fileId": null
+                    //                 },
+                    //                  {
+                    //                     "fileName": "output2.pdf",
+                    //                     "fileType": null,
+                    //                     "fileUrl": "https://buddyai-document.s3.amazonaws.com/rt56-gh89-6bg7-LTTS04-output.pdf",
+                    //                     "fileId": null
+                    //                 }
+                    //             ]
+                    //         },
+                    //         "uuId": "738f212b-9b02-48ca-b481-7d1e99bdb922",
+                    //         "requestId": "rt56-gh89-6bg7",
+                    //         "stateType": null
+                    //     }
+                    // `;
+
                     // const data = JSON.parse(documentData); // Simulating API response for testing   
-                    console.log('API Response:', data);
+                    // console.log('API Response:', data);
 
                     // Process the response
                     if (data) {
@@ -1219,8 +1267,9 @@
                             // OpenAI-style response
                             botResponseContent = this.renderMarkdown(data.choices[0].message.content);
                         } else if (data.type === "COMPLEX" && data.complex) {
-                        
-                    
+                            
+                            console.log('in complex');
+
                             // IMAGES
                             if (data.complex.metaData.type === "IMAGE" && data.complex.data && data.complex.data.length > 0) {
                                 botResponseContent = '<div class="response-images">';
@@ -1297,23 +1346,94 @@
                             }
 
 
-                        // DOCUMENT
-                        if (data.complex.metaData.type === "TEXT") { 
-                                const responseText = this.renderMarkdown(data.complex.data.response);
-                                let referenceText = '';
+                            // DOCUMENT
+                            if (data.complex.metaData.type === "TEXT") { 
+                                    const responseText = this.renderMarkdown(data.complex.data.response);
+                                    let referenceText = '';
 
-                                if (data.complex.data.documents && data.complex.data.documents.length > 0) {
-                                    referenceText += `<div style="margin-top: 10px; font-size: 13px; color: gray;">Source(s):<br>`;
-                                    data.complex.data.documents.forEach((doc, index) => {
-                                        const pages = doc.pages.join(', ');
-                                        referenceText += `&bull; <strong>${doc.fileName}</strong> (Pages: ${pages})<br>`;
-                                    });
-                                    referenceText += `</div>`;
-                                }
+                                    if (data.complex.data.documents && data.complex.data.documents.length > 0) {
+                                        referenceText += `<div style="margin-top: 10px; font-size: 13px; color: gray;">Source(s):<br>`;
+                                        data.complex.data.documents.forEach((doc, index) => {
+                                            const pages = doc.pages.join(', ');
+                                            referenceText += `&bull; <strong>${doc.fileName}</strong> (Pages: ${pages})<br>`;
+                                        });
+                                        referenceText += `</div>`;
+                                    }
 
-                                botResponseContent = responseText + referenceText;
+                                    botResponseContent = responseText + referenceText;
                             }
 
+                            // "DOCUMENT_UPLOAD_LIST"
+
+                            if (data.complex.metaData.type === "DOCUMENT_UPLOAD_LIST") { 
+                            console.log('in "DOCUMENT_UPLOAD_LIST"');
+
+                            const responseText = this.renderMarkdown(data.text);
+                          let referenceText = `
+                                <div style="margin-top: 10px; font-size: 13px; color: gray;">
+                                    <strong>Uploaded Documents:</strong><br>
+                                    <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
+                            `;
+
+                            if (data.complex.data && data.complex.data.length > 0) {
+                                data.complex.data.forEach(doc => {
+                                    const fileId = this.generateMessageId(); // unique ID
+                                    const fileName = doc.fileName;
+                                    const fileUrl = doc.fileUrl;
+
+                                    referenceText += `
+                                        <label for="${fileId}" style="
+                                            display: flex;
+                                            align-items: center;
+                                            background: var(--input-bg);
+                                            color: var(--input-text);
+                                            padding: 6px 10px;
+                                            border-radius: 18px;
+                                            font-size: 13px;
+                                            border: 1px solid var(--border-color);
+                                            gap: 6px;
+                                            cursor: pointer;
+                                             max-width: 50%;
+                                        ">
+                                            <input 
+                                                type="checkbox" 
+                                                id="${fileId}" 
+                                                value="${fileName}" 
+                                                style="margin-right: 6px;"
+                                            />
+                                            <span title="${fileName}" style="max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                                ${fileName}
+                                            </span>
+                                            <a href="${fileUrl}" target="_blank" style="color: var(--accent-color); margin-left: 6px;">📄</a>
+                                        </label>
+                                    `;
+                                });
+                            }
+
+                            referenceText += `</div></div>`;
+                            botResponseContent = responseText + referenceText;
+
+                            // Delay DOM binding
+                            setTimeout(() => {
+                                const checkboxes = document.querySelectorAll('.bot-message input[type="checkbox"]');
+                                checkboxes.forEach(checkbox => {
+                                    checkbox.addEventListener('change', (e) => {
+                                        const name = e.target.value;
+                                        if (e.target.checked) {
+                                            if (!this.selectedDocumentFiles.includes(name)) {
+                                                this.selectedDocumentFiles.push(name);
+                                            }
+                                        } else {
+                                            this.selectedDocumentFiles = this.selectedDocumentFiles.filter(f => f !== name);
+                                        }
+                                        console.log("Selected file names:", this.selectedDocumentFiles.join(', '));
+                                        this.userInput.value = this.selectedDocumentFiles.join(', ');
+                                        this.sendButton.disabled = this.userInput.value.trim() === '';                                        
+                                    });
+                                });
+                            }, 100);
+                        }                         
+                        // "DOCUMENT_UPLOAD_LIST"
                         }
 
                     

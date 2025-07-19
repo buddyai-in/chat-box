@@ -1,35 +1,51 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat Widget Sample</title> 
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Chat Widget Sample</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to right, #f2f6f9, #dbe9f4);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+
+    button {
+      padding: 12px 20px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
 </head>
-<body >
+<body>
 
-   
+  <button onclick="window.open('local-storage.html', '_blank')">Open Local Storage</button>
+  <script src="chat-widget.js"></script>
 
-    <!-- Include the standalone chat widget JavaScript file -->
-    <script src="chat-widget.js"></script>
-
-    <script>
-        localStorage.setItem('isLoggedIn', "true")
-        localStorage.setItem('userId', 'PS123')
-        localStorage.setItem('bai-sk','sk_4FOSLGRV9_DidErmtQ9gOAirxNOTzJtIt7-QJEWSuSY')
-        localStorage.setItem('jwt', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VyTmFtZSI6IlBTMTIzIiwiZXhwIjoxNzUwMDczNTcwfQ.vA03uel5rvCp-6e8z6MzvcC-2MAhQ_nvYeMWg43F2Ns')
-        localStorage.setItem('userName','PS123')
-        localStorage.setItem('sid','Jtc13-CXzOsXGrOZ99FvIw')
-        localStorage.setItem('documentId','2000021')
-
-
-
-    </script>
-
-     
+  <script>
+    localStorage.setItem('isLoggedIn', "true");
+    localStorage.setItem('userId', 'PS123');
+    localStorage.setItem('bai-sk', 'sk_4FOSLGRV9_DidErmtQ9gOAirxNOTzJtIt7-QJEWSuSY');
+    localStorage.setItem('jwt', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...');
+    localStorage.setItem('userName', 'PS123');
+    localStorage.setItem('sid', 'Jtc13-CXzOsXGrOZ99FvIw');
+    localStorage.setItem('documentId', '2000021');
+  </script>
 
 </body>
 </html>
-
-
- 
-                
