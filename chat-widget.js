@@ -725,11 +725,7 @@
                 <div class="chatbot-controls-row">
                     <div class="file-upload-wrapper">
                         <button class="file-upload-label" role="button" aria-label="Upload file" tabindex="0" id="fileMenuButton">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M21 15V19C21 20.1046 20.1046 21 19 21H5C3.89543 21 3 20.1046 3 19V15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                <path d="M17 8L12 3L7 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                <path d="M12 3V15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
+                            <img src="icons8-file-upload-51.png" width="25px" />
                             <input type="file" id="chatbotFileUpload" class="file-upload-input" aria-hidden="true" accept="image/*,video/*,audio/*,.pdf,.html" multiple>
                         </button>
                         
@@ -784,7 +780,7 @@
                     </select>
                     
                     <button class="send-button" id="chatbotSendButton" aria-label="Send message" disabled>
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-top: 2px;margin-right: 6px;">
                             <path d="M22 2L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                             <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
