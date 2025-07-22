@@ -836,7 +836,7 @@
                 let env = localStorage.getItem('profile');
                 
             this.chatApiEndpoint = 'https://'+env+'.api.chat.buddyai.in/v2/api/'+this.sId+'/chat/';
-            this.docApiEndpoint = 'https://'+ env+'api.chat.buddyai.in/v2/api/document/'+this.sId+'/chat/';
+            this.docApiEndpoint = 'https://'+ env+'.api.chat.buddyai.in/v2/api/document/'+this.sId+'/chat/';
                 this.supportedFileTypes = {
                     image: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
                     video: ['video/mp4', 'video/webm', 'video/ogg'],
@@ -929,7 +929,7 @@
             }
 
             generateSessionId() {
-                    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxx'.replace(/[xy]/g, function(c) {
                         const r = Math.random() * 16 | 0;
                         const v = c === 'x' ? r : (r & 0x3 | 0x8);
                         return v.toString(16);
@@ -937,7 +937,7 @@
             }
 
             generateRequestId() {
-                return  'xxxx-xxxx-xxxx'.replace(/[xy]/g, function(c) {
+                return  'xxxxx-xxxx-9xxx-xxxx'.replace(/[xy]/g, function(c) {
                     const r = Math.random() * 16 | 0;
                     const v = c === 'x' ? r : (r & 0x3 | 0x8);
                     return v.toString(16);
@@ -1202,8 +1202,8 @@
                    const data = await response.json();
 
 
-                    
-                    // const data = JSON.parse(documentData1); // Simulating API response for testing   
+
+                    // const data = JSON.parse(documentData1); // Simulating API response for testing
                     console.log('API Response:', data);
 
                     // Process the response
