@@ -1163,10 +1163,6 @@
                     formData.append('payload', JSON.stringify(payload));
 
                     if (this.apiMode) {
-                        const dummyContent = new Blob(["Hello, this is dummy file content"], { type: "text/plain" });
-                        const dummyFile = new File([dummyContent], "dummy.txt", { type: "text/plain" });
-                        formData.append('files',dummyFile);
-                    } else {
                         // Add all uploaded files
                         this.uploadedFiles.forEach(file => {
                             formData.append('files', file);
@@ -1201,11 +1197,24 @@
 
                    const data = await response.json();
 
+//                const data1 = `{
+//   "text": "https://buddyai-dev-temp.s3.ap-south-1.amazonaws.com/4_ae8f2-a9ef-99f7-4807_monthly_payslip.pdf",
+//   "menu": null,
+//   "form": null,
+//   "link": "https://buddyai-dev-temp.s3.ap-south-1.amazonaws.com/4_ae8f2-a9ef-99f7-4807_monthly_payslip.pdf",
+//   "type": "DOWNLOADABLE",
+//   "downloadablePath": null,
+//   "complex": null,
+//   "uuId": "d0072b79-0969-4325-bed0-7179b3322022",
+//   "requestId": "ae8f2-a9ef-99f7-4807",
+//   "stateType": null
+// }`;
 
                     
                     // const data = JSON.parse(documentData1); // Simulating API response for testing   
-                    console.log('API Response:', data);
-
+                    // console.log('API Response:', data1);
+                    // const data = JSON.parse(data1);
+console.log('API Response:', data);
                     // Process the response
                     if (data) {
                         const messageId = data.uuId;
@@ -1389,11 +1398,13 @@
                         }                         
                         // "DOCUMENT_UPLOAD_LIST"
                         } else if (data.type === "DOWNLOADABLE" && data.link) {
+                            console.log('in DOWNLOADABLE');
                             // Handle downloadable link
                             botResponseContent = `
                                 <div class="response-content">
-                                    <a href="${data.link}" class="response-download" download="${data.text || 'download'}">
-                                        Download: ${data.text || 'file'}
+                                <img src='icons8-file-128'>
+                                    <a href="${data.link}" target="_blank" class="response-download" download="${data.text || 'download'}">
+                                        Download: ${data.text.split("/").pop() || 'file'}
                                     </a>
                                 </div>
                             `;
