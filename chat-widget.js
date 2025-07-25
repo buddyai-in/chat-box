@@ -1210,18 +1210,14 @@
 //   "stateType": null
 // }`;
 
-<<<<<<< HEAD
                     
                     // const data = JSON.parse(documentData1); // Simulating API response for testing   
                     // console.log('API Response:', data1);
                     // const data = JSON.parse(data1);
-console.log('API Response:', data);
-=======
+                    console.log('API Response:', data);
 
                     // const data = JSON.parse(documentData1); // Simulating API response for testing
                     console.log('API Response:', data);
-
->>>>>>> 4b8c4987daf497842a4f8d1cb8bab4a2af9da576
                     // Process the response
                     if (data) {
                         const messageId = data.uuId;
@@ -1409,9 +1405,10 @@ console.log('API Response:', data);
                             // Handle downloadable link
                             botResponseContent = `
                                 <div class="response-content">
-                                <img src='icons8-file-128'>
-                                    <a href="${data.link}" target="_blank" class="response-download" download="${data.text || 'download'}">
-                                        Download: ${data.text.split("/").pop() || 'file'}
+                                <img src='icons8-file-upload-51.png' alt='File Upload' style='width: 100px; height: 100px;margin-bottom: 2px'>
+                                <br/>
+                                <a href="${data.link}" style="color:white" target="_blank" class="response-download" download="${data.text || 'download'}">
+                                ${data.text.split("/").pop() || 'file'}
                                     </a>
                                 </div>
                             `;
