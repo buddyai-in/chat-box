@@ -19,7 +19,7 @@
             display: block;
             margin-bottom: 5px;
         }
-        input, select {
+        input {
             width: 100%;
             padding: 8px;
             border: 1px solid #ddd;
@@ -51,10 +51,6 @@
             <input type="text" id="userName" required>
         </div>
         <div class="form-group">
-            <label for="userName">Company Name:</label>
-            <input type="text" id="companyName" required>
-        </div>
-        <div class="form-group">
             <label for="apiKey">API Key:</label>
             <input type="text" id="apiKey" required>
         </div>
@@ -74,14 +70,6 @@
             <label for="token">Token:</label>
             <input type="text" id="token" required/>
         </div>
-        <div class="form-group">
-            <label for="profile">Profile:</label>
-            <select id="profile" required>
-                <option value="">Select environment</option>
-                <option value="uat">UAT</option>
-                <option value="dev">DEV</option>
-            </select>
-        </div>
         <button type="submit">Save Information</button>
     </form>
 </div>
@@ -98,8 +86,6 @@
         const sid = document.getElementById('sid').value;
         const sKey = document.getElementById('sKey').value;
         const token = document.getElementById('token').value;
-        const profile = document.getElementById('profile').value;
-        const company = document.getElementById('companyName').value;
 
         // Store in localStorage
         localStorage.setItem('isLoggedIn', 'true');
@@ -108,13 +94,13 @@
         localStorage.setItem('userName', userName);
         localStorage.setItem('documentId', documentId);
         localStorage.setItem('sid', sid);
-        localStorage.setItem('bai-sk', sKey);
-        localStorage.setItem('jwt', token);
-        localStorage.setItem('profile', profile);
-        localStorage.setItem('company', company);
+        localStorage.setItem('bai-sk',sKey)
+        localStorage.setItem('jwt',token)
+
 
         alert('Information saved successfully!');
     });
+
 
     function generateSessionId() {
         return Math.random().toString(36).substring(2, 15);

@@ -1,7 +1,7 @@
-    // Complete Chatbot Implementation with File Support, HTML Menu, Feedback, and Response Handling
-    document.addEventListener('DOMContentLoaded', function() {
-        // Create and inject the chatbot HTML structure
-        const chatbotHTML = `
+// Complete Chatbot Implementation with File Support, HTML Menu, Feedback, and Response Handling
+document.addEventListener('DOMContentLoaded', function() {
+    // Create and inject the chatbot HTML structure
+    const chatbotHTML = `
         <style>
             :root {
                 --custom-header-bg:#222;
@@ -725,11 +725,38 @@
                 <div class="chatbot-controls-row">
                     <div class="file-upload-wrapper">
                         <button class="file-upload-label" role="button" aria-label="Upload file" tabindex="0" id="fileMenuButton">
-                            <img src="icons8-file-upload-51.png" width="25px" />
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M21 15V19C21 20.1046 20.1046 21 19 21H5C3.89543 21 3 20.1046 3 19V15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M17 8L12 3L7 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M12 3V15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
                             <input type="file" id="chatbotFileUpload" class="file-upload-input" aria-hidden="true" accept="image/*,video/*,audio/*,.pdf,.html" multiple>
                         </button>
                         
                         <div class="chatbot-menu" id="fileMenu">
+                            <div class="menu-item" data-type="image">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M4 16L8.586 11.414C8.961 11.039 9.47 10.828 10 10.828C10.53 10.828 11.039 11.039 11.414 11.414L16 16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M14 14L15.586 12.414C15.961 12.039 16.47 11.828 17 11.828C17.53 11.828 18.039 12.039 18.414 12.414L20 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M3 20H21C21.552 20 22 19.552 22 19V5C22 4.448 21.552 4 21 4H3C2.448 4 2 4.448 2 5V19C2 19.552 2.448 20 3 20Z" stroke="currentColor" stroke-width="2"/>
+                                </svg>
+                                <span>Image</span>
+                            </div>
+                            <div class="menu-item" data-type="video">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M23 7L16 12L23 17V7Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M14 5H3C1.895 5 1 5.895 1 7V17C1 18.105 1.895 19 3 19H14C15.105 19 16 18.105 16 17V7C16 5.895 15.105 5 14 5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                <span>Video</span>
+                            </div>
+                            <div class="menu-item" data-type="audio">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 1C10.343 1 9 2.343 9 4V12C9 13.657 10.343 15 12 15C13.657 15 15 13.657 15 12V4C15 2.343 13.657 1 12 1Z" stroke="currentColor" stroke-width="2"/>
+                                    <path d="M19 10V12C19 15.866 15.866 19 12 19C8.134 19 5 15.866 5 12V10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                    <path d="M12 19V23" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                </svg>
+                                <span>Audio</span>
+                            </div>
                             <div class="menu-item" data-type="pdf">
                                 <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M14 2H6C4.895 2 4 2.895 4 4V20C4 21.105 4.895 22 6 22H18C19.105 22 20 21.105 20 20V8L14 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -741,6 +768,13 @@
                                 </svg>
                                 <span>PDF</span>
                             </div>
+                            <div class="menu-item" data-type="html">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M4 3H20L18.5 19.5L12 21L5.5 19.5L4 3Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M17 7H7.5L8 12H16.5L16 17L12 18L8 17L7.75 14.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                <span>HTML</span>
+                            </div>
                         </div>
                     </div>
                     
@@ -750,7 +784,7 @@
                     </select>
                     
                     <button class="send-button" id="chatbotSendButton" aria-label="Send message" disabled>
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-top: 2px;margin-right: 6px;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M22 2L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                             <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
@@ -762,245 +796,240 @@
         </div>
         `;
 
-        const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-        if(isLoggedIn) {
-            // Inject the chatbot HTML into the body
-            document.body.insertAdjacentHTML('beforeend', chatbotHTML);
+    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+    if(isLoggedIn) {
+        // Inject the chatbot HTML into the body
+        document.body.insertAdjacentHTML('beforeend', chatbotHTML);
+    }
+
+    // Chatbot Class
+    class Chatbot {
+
+        constructor() {
+            // DOM elements
+            this.container = document.getElementById('chatbotContainer');
+            this.toggleButton = document.getElementById('chatbotToggle');
+            this.messagesContainer = document.getElementById('chatbotMessages');
+            this.userInput = document.getElementById('chatbotUserInput');
+            this.defaultPrompt = document.getElementById('defaultPromptInput');
+            this.sendButton = document.getElementById('chatbotSendButton');
+            this.fileUpload = document.getElementById('chatbotFileUpload');
+            this.fileMenuButton = document.getElementById('fileMenuButton');
+            this.fileMenu = document.getElementById('fileMenu');
+            this.modelSelector = document.getElementById('chatbotModelSelector');
+            this.themeToggle = document.querySelector('.theme-toggle');
+            this.apiToggle = document.querySelector('.api-toggle');
+            this.closeButton = document.querySelector('.close-chatbot');
+            this.errorDisplay = document.getElementById('chatbotError');
+            this.chatbotCopyMsg = document.getElementById('chatbotCopyMsg');
+            this.resetButton = document.querySelector('.reset-chat');
+
+            // State
+            this.isOpen = false;
+            this.currentTheme = localStorage.getItem('chatbot-theme') || 'dark';
+            this.apiMode = true;
+            this.sessionId = this.generateSessionId();
+            this.requestId = this.generateRequestId();
+            this.uploadedFiles = [];
+            this.messageFeedback = {};
+
+            this.sId = localStorage.getItem('sid');
+            this.sdocumentIdId = localStorage.getItem('documentId');
+            // Configuration
+            this.chatApiEndpoint = 'https://uat.api.chat.buddyai.in/v2/api/'+this.sId+'/chat/';
+            this.docApiEndpoint = 'https://uat.api.chat.buddyai.in/v2/api/document/'+this.sId+'/chat/';
+            this.supportedFileTypes = {
+                image: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
+                video: ['video/mp4', 'video/webm', 'video/ogg'],
+                audio: ['audio/mpeg', 'audio/ogg', 'audio/wav'],
+                pdf: ['application/pdf'],
+                html: ['text/html']
+            };
+
+            // Initialize state
+
+            const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+            if(isLoggedIn) {
+                // Initialize
+                this.init();
+            }
+
         }
 
-        // Chatbot Class
-        class Chatbot {
+        init() {
+            // Set initial theme
+            this.setTheme(this.currentTheme);
+            this.sId = localStorage.getItem('sid');
 
-            constructor() {
-                // DOM elements
-                this.container = document.getElementById('chatbotContainer');
-                this.toggleButton = document.getElementById('chatbotToggle');
-                this.messagesContainer = document.getElementById('chatbotMessages');
-                this.userInput = document.getElementById('chatbotUserInput');
-                this.defaultPrompt = document.getElementById('defaultPromptInput');
-                this.sendButton = document.getElementById('chatbotSendButton');
-                this.fileUpload = document.getElementById('chatbotFileUpload');
-                this.fileMenuButton = document.getElementById('fileMenuButton');
-                this.fileMenu = document.getElementById('fileMenu');
-                this.modelSelector = document.getElementById('chatbotModelSelector');
-                this.themeToggle = document.querySelector('.theme-toggle');
-                this.apiToggle = document.querySelector('.api-toggle');
-                this.closeButton = document.querySelector('.close-chatbot');
-                this.errorDisplay = document.getElementById('chatbotError');
-                this.chatbotCopyMsg = document.getElementById('chatbotCopyMsg');
-                this.resetButton = document.querySelector('.reset-chat');
+            // Event listeners
+            this.toggleButton.addEventListener('click', () => this.toggleChatbot());
+            this.closeButton.addEventListener('click', () => this.closeChatbot());
+            this.themeToggle.addEventListener('click', () => this.toggleTheme());
+            this.apiToggle.addEventListener('click', () => this.toggleApiMode());
 
-                // State
-                this.isOpen = false;
-                this.currentTheme = localStorage.getItem('chatbot-theme') || 'dark';
-                this.apiMode = true;
-                this.sessionId = this.generateSessionId();
-                this.requestId = this.generateRequestId();
-                this.companyName = this.getCompanyName();
-                this.uploadedFiles = [];
-                this.messageFeedback = {};
-                this.selectedDocumentFiles = [];
+            this.userInput.addEventListener('input', () => {
+                this.sendButton.disabled = this.userInput.value.trim() === '' && this.uploadedFiles.length === 0 && this.defaultPrompt.value.trim() === '';
+                this.clearError();
+            });
 
-                this.sId = localStorage.getItem('sid');
-                this.sdocumentIdId = localStorage.getItem('documentId');
-                // Configuration
-                let env = localStorage.getItem('profile');
-                
-            this.chatApiEndpoint = 'https://'+env+'.api.chat.buddyai.in/v2/api/'+this.sId+'/chat/';
-            this.docApiEndpoint = 'https://'+ env+'.api.chat.buddyai.in/v2/api/document/'+this.sId+'/chat/';
-                this.supportedFileTypes = {
-                    pdf: ['application/pdf']
-                };
+            this.defaultPrompt.addEventListener('input', () => {
+                this.sendButton.disabled = this.userInput.value.trim() === '' && this.uploadedFiles.length === 0 && this.defaultPrompt.value.trim() === '';
+                this.clearError();
+            });
 
-                // Initialize state
-
-                const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-                if(true) {
-                    // Initialize
-                    this.init();
-                }
-
-            }
-
-            init() {
-                // Set initial theme
-                this.setTheme(this.currentTheme);
-                this.sId = localStorage.getItem('sid');
-
-                // Event listeners
-                this.toggleButton.addEventListener('click', () => this.toggleChatbot());
-                this.closeButton.addEventListener('click', () => this.closeChatbot());
-                this.themeToggle.addEventListener('click', () => this.toggleTheme());
-                this.apiToggle.addEventListener('click', () => this.toggleApiMode());
-
-                this.userInput.addEventListener('input', () => {
-                    this.sendButton.disabled = this.userInput.value.trim() === '' && this.uploadedFiles.length === 0 && this.defaultPrompt.value.trim() === '';
-                    this.clearError();
-                });
-
-                this.defaultPrompt.addEventListener('input', () => {
-                    this.sendButton.disabled = this.userInput.value.trim() === '' && this.uploadedFiles.length === 0 && this.defaultPrompt.value.trim() === '';
-                    this.clearError();
-                });
-
-                this.userInput.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        if (!this.sendButton.disabled) {
-                            this.sendMessage();
-                        }
+            this.userInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    if (!this.sendButton.disabled) {
+                        this.sendMessage();
                     }
-                });
+                }
+            });
 
-                this.sendButton.addEventListener('click', () => this.sendMessage());
+            this.sendButton.addEventListener('click', () => this.sendMessage());
 
-                // File menu handlers
-                this.fileMenuButton.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    this.fileMenu.classList.toggle('show');
-                });
+            // File menu handlers
+            this.fileMenuButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.fileMenu.classList.toggle('show');
+            });
 
-                document.addEventListener('click', () => {
+            document.addEventListener('click', () => {
+                this.fileMenu.classList.remove('show');
+            });
+
+            this.fileMenu.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const menuItem = e.target.closest('.menu-item');
+                if (menuItem) {
+                    const type = menuItem.dataset.type;
+                    this.setFileInputAccept(type);
+                    this.fileUpload.click();
                     this.fileMenu.classList.remove('show');
-                });
-
-                this.fileMenu.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const menuItem = e.target.closest('.menu-item');
-                    if (menuItem) {
-                        const type = menuItem.dataset.type;
-                        this.setFileInputAccept(type);
-                        this.fileUpload.click();
-                        this.fileMenu.classList.remove('show');
-                    }
-                });
-
-                this.fileUpload.addEventListener('change', () => {
-                    if (this.fileUpload.files && this.fileUpload.files.length > 0) {
-                        this.handleFileUpload(this.fileUpload.files);
-                    }
-                });
-
-                // Initial welcome message
-                setTimeout(() => {
-                    this.addMessage('bot', "Hello! I'm your AI assistant. How can I help you today?");
-                }, 500);
-
-                const defaultPromptInput = document.getElementById('defaultPromptInput');
-                defaultPromptInput.addEventListener('input', () => {
-                    defaultPromptInput.style.height = 'auto';
-                    defaultPromptInput.style.height = Math.min(defaultPromptInput.scrollHeight, 120) + 'px';
-                });
-
-                this.resetButton.addEventListener('click', () => this.resetChat());
-            }
-
-            generateSessionId() {
-                    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxx'.replace(/[xy]/g, function(c) {
-                        const r = Math.random() * 16 | 0;
-                        const v = c === 'x' ? r : (r & 0x3 | 0x8);
-                        return v.toString(16);
-                    });
-            }
-
-            generateRequestId() {
-                return  'xxxxx-xxxx-9xxx-xxxx'.replace(/[xy]/g, function(c) {
-                    const r = Math.random() * 16 | 0;
-                    const v = c === 'x' ? r : (r & 0x3 | 0x8);
-                    return v.toString(16);
-                });
-            }
-            getCompanyName() {
-                // In a real implementation, you would get this from your auth system
-                return localStorage.getItem('company');
-            }
-
-            getAuthToken() {
-                // In a real implementation, you would get this from your auth system
-                return localStorage.getItem('jwt');
-            }
-
-            getsSecretKey() {
-                // In a real implementation, you would get this from your auth system
-                return localStorage.getItem('bai-sk');
-            }
-
-            getUserId() {
-                return localStorage.getItem('userId');
-            }
-
-            toggleChatbot() {
-                this.isOpen = !this.isOpen;
-                if (this.isOpen) {
-                    this.container.classList.remove('hidden');
-                    this.userInput.focus();
-                } else {
-                    this.container.classList.add('hidden');
-                    // Clear chat and generate new session when closed
-                    this.clearChat();
-                    this.requestId = this.generateRequestId();
-                    this.sessionId = this.generateSessionId();
-
-                    this.addMessage('bot', "Hello! I'm your AI assistant. How can I help you today?");
                 }
-            }
+            });
 
-            clearChat() {
-                this.messagesContainer.innerHTML = '';
-                this.uploadedFiles = [];
-                this.messageFeedback = {};
-            }
+            this.fileUpload.addEventListener('change', () => {
+                if (this.fileUpload.files && this.fileUpload.files.length > 0) {
+                    this.handleFileUpload(this.fileUpload.files);
+                }
+            });
 
-            closeChatbot() {
-                this.isOpen = false;
+            // Initial welcome message
+            setTimeout(() => {
+                this.addMessage('bot', "Hello! I'm your AI assistant. How can I help you today?");
+            }, 500);
+
+            const defaultPromptInput = document.getElementById('defaultPromptInput');
+            defaultPromptInput.addEventListener('input', () => {
+                defaultPromptInput.style.height = 'auto';
+                defaultPromptInput.style.height = Math.min(defaultPromptInput.scrollHeight, 120) + 'px';
+            });
+
+            this.resetButton.addEventListener('click', () => this.resetChat());
+        }
+
+        generateSessionId() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                const r = Math.random() * 16 | 0;
+                const v = c === 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+
+        generateRequestId() {
+            return  'xxxx-xxxx-xxxx'.replace(/[xy]/g, function(c) {
+                const r = Math.random() * 16 | 0;
+                const v = c === 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+
+        getAuthToken() {
+            // In a real implementation, you would get this from your auth system
+            return localStorage.getItem('jwt');
+        }
+
+        getsSecretKey() {
+            // In a real implementation, you would get this from your auth system
+            return localStorage.getItem('bai-sk');
+        }
+
+        getUserId() {
+            return localStorage.getItem('userId');
+        }
+
+        toggleChatbot() {
+            this.isOpen = !this.isOpen;
+            if (this.isOpen) {
+                this.container.classList.remove('hidden');
+                this.userInput.focus();
+            } else {
                 this.container.classList.add('hidden');
                 // Clear chat and generate new session when closed
                 this.clearChat();
-                this.sessionId = this.generateSessionId();
                 this.requestId = this.generateRequestId();
+                this.sessionId = this.generateSessionId();
                 this.addMessage('bot', "Hello! I'm your AI assistant. How can I help you today?");
             }
+        }
 
-            setTheme(theme) {
-                this.currentTheme = theme;
-                document.documentElement.setAttribute('data-theme', theme);
-                localStorage.setItem('chatbot-theme', theme);
+        clearChat() {
+            this.messagesContainer.innerHTML = '';
+            this.uploadedFiles = [];
+            this.messageFeedback = {};
+        }
+
+        closeChatbot() {
+            this.isOpen = false;
+            this.container.classList.add('hidden');
+            // Clear chat and generate new session when closed
+            this.clearChat();
+            this.sessionId = this.generateSessionId();
+            this.requestId = this.generateRequestId();
+            this.addMessage('bot', "Hello! I'm your AI assistant. How can I help you today?");
+        }
+
+        setTheme(theme) {
+            this.currentTheme = theme;
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('chatbot-theme', theme);
+        }
+
+        toggleTheme() {
+            const newTheme = this.currentTheme === 'dark' ? 'light' : 'dark';
+            this.setTheme(newTheme);
+        }
+
+        toggleApiMode() {
+            this.apiMode = !this.apiMode;
+            this.apiToggle.style.backgroundColor = this.apiMode ? 'var(--accent-color)' : '';
+            this.apiToggle.style.color = this.apiMode ? 'white' : '';
+            this.addMessage('bot', this.apiMode ?
+                'Switched to API mode.' :
+                'Switched to Document mode.');
+
+            if (this.fileMenuButton) {
+                this.fileMenuButton.style.display = this.apiMode ? 'flex' : 'none';
             }
+        }
 
-            toggleTheme() {
-                const newTheme = this.currentTheme === 'dark' ? 'light' : 'dark';
-                this.setTheme(newTheme);
-            }
+        setFileInputAccept(type) {
+            this.fileUpload.accept = this.supportedFileTypes[type].join(',');
+        }
 
-            toggleApiMode() {
-                this.apiMode = !this.apiMode;
-                this.apiToggle.style.backgroundColor = this.apiMode ? 'var(--accent-color)' : '';
-                this.apiToggle.style.color = this.apiMode ? 'white' : '';
-                this.addMessage('bot', this.apiMode ?
-                    'Switched to API mode.' :
-                    'Switched to Document mode.');
-                
-                if (this.fileMenuButton) {
-                    this.fileMenuButton.style.display = this.apiMode ? 'flex' : 'none';
-                }
-            }
+        handleFileUpload(files) {
 
-            setFileInputAccept(type) {
-                this.fileUpload.accept = this.supportedFileTypes[type].join(',');
-            }
-
-            handleFileUpload(files) {
-
-                const newFiles = Array.from(files);
+            const newFiles = Array.from(files);
 
             newFiles.forEach(file => {
-            this.uploadedFiles.push(file);
-            const fileId = this.generateMessageId();
+                this.uploadedFiles.push(file);
+                const fileId = this.generateMessageId();
 
-            const fileChip = document.createElement('div');
-            fileChip.classList.add('chatbot-file-chip');
-            fileChip.setAttribute('data-id', fileId);
-            fileChip.style.cssText = `
+                const fileChip = document.createElement('div');
+                fileChip.classList.add('chatbot-file-chip');
+                fileChip.setAttribute('data-id', fileId);
+                fileChip.style.cssText = `
                 display: flex;
                 align-items: center;
                 background: var(--input-bg);
@@ -1013,141 +1042,137 @@
                 width: 135px;
             `;
 
-            fileChip.innerHTML = `
+                fileChip.innerHTML = `
                 <span style="white-space: nowrap; max-width: 100px; overflow: hidden; text-overflow: ellipsis;">${file.name}</span>
                 <button style="background: none; border: none; color: red; font-size: 14px; cursor: pointer;" aria-label="Remove file">❌</button>
             `;
 
-            fileChip.querySelector('button').addEventListener('click', () => {
-                this.uploadedFiles = this.uploadedFiles.filter(f => f.name !== file.name);
-                fileChip.remove();
-                this.sendButton.disabled = this.userInput.value.trim() === '' && this.uploadedFiles.length === 0 && this.defaultPrompt.value.trim() === '';
+                fileChip.querySelector('button').addEventListener('click', () => {
+                    this.uploadedFiles = this.uploadedFiles.filter(f => f.name !== file.name);
+                    fileChip.remove();
+                    this.sendButton.disabled = this.userInput.value.trim() === '' && this.uploadedFiles.length === 0 && this.defaultPrompt.value.trim() === '';
+                });
+
+                document.getElementById('chatbotFileList').appendChild(fileChip);
             });
 
-            document.getElementById('chatbotFileList').appendChild(fileChip);
-        });
-
-        this.sendButton.disabled = this.userInput.value.trim() === '' && this.uploadedFiles.length === 0 && this.defaultPrompt.value.trim() === '';
+            this.sendButton.disabled = this.userInput.value.trim() === '' && this.uploadedFiles.length === 0 && this.defaultPrompt.value.trim() === '';
 
 
-            }
+        }
 
-            getFileType(mimeType) {
-                for (const [type, mimes] of Object.entries(this.supportedFileTypes)) {
-                    if (mimes.includes(mimeType)) {
-                        return type;
-                    }
+        getFileType(mimeType) {
+            for (const [type, mimes] of Object.entries(this.supportedFileTypes)) {
+                if (mimes.includes(mimeType)) {
+                    return type;
                 }
-                return 'file';
+            }
+            return 'file';
+        }
+
+        formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+        }
+
+        adjustTextareaHeight() {
+            this.userInput.style.height = 'auto';
+            this.userInput.style.height = Math.min(this.userInput.scrollHeight, 120) + 'px';
+        }
+
+        clearError() {
+            this.errorDisplay.textContent = '';
+        }
+
+        showError(message) {
+            this.errorDisplay.textContent = message;
+        }
+
+        clearCopyMsg() {
+            this.chatbotCopyMsg.textContent = '';
+        }
+
+        showCopyMsg(message) {
+            this.chatbotCopyMsg.textContent = message;
+        }
+
+        async sendMessage() {
+            let userText = this.userInput.value.trim();
+            let df = this.defaultPrompt.value.trim();
+
+            if (userText === '' && this.uploadedFiles.length === 0 && df === '') return;
+
+            console.log('apiMode:', this.apiMode);
+
+            // Add user message to chat
+            if (userText) {
+                this.addMessage('user', userText);
             }
 
-            formatFileSize(bytes) {
-                if (bytes === 0) return '0 Bytes';
-                const k = 1024;
-                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-                const i = Math.floor(Math.log(bytes) / Math.log(k));
-                return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+            if (userText === '') {
+                userText = 'file upload';
             }
 
-            adjustTextareaHeight() {
-                this.userInput.style.height = 'auto';
-                this.userInput.style.height = Math.min(this.userInput.scrollHeight, 120) + 'px';
-            }
+            this.userInput.value = '';
+            this.userInput.style.height = '40px';
+            this.sendButton.disabled = true;
 
-            clearError() {
-                this.errorDisplay.textContent = '';
-            }
+            // Add loading indicator for bot response
+            const botMessage = this.addMessage('bot', '');
 
-            showError(message) {
-                this.errorDisplay.textContent = message;
-            }
-
-            clearCopyMsg() {
-                this.chatbotCopyMsg.textContent = '';
-            }
-
-            showCopyMsg(message) {
-                this.chatbotCopyMsg.textContent = message;
-            }
-
-            async sendMessage() {
-                let userText = this.userInput.value.trim();
-                let df = this.defaultPrompt.value.trim();
-
-                if (userText === '' && this.uploadedFiles.length === 0 && df === '') return;
-
-                console.log('apiMode:', this.apiMode);
-
-                // Add user message to chat
-                if (userText) {
-                    this.addMessage('user', userText);
-                }
-
-                if (userText === '') {
-                    userText = 'file upload';
-                }
-
-                this.userInput.value = '';
-                this.userInput.style.height = '40px';
-                this.sendButton.disabled = true;
-
-                // Add loading indicator for bot response
-                const botMessage = this.addMessage('bot', '');
-
-                try {
-                    // Prepare the request
-                    const formData = new FormData();
-                    const payload = {
-                        messages: [
-                            {
-                                role: "user",
-                                content: userText,
-                            }
-                        ],
-                        tools: [],
-                        context: {
-                            userId: this.getUserId(),
-                            requestId: this.requestId,
-                            sessionId: this.sessionId,
-                            companyCode: this.getCompanyName(),
-                            jwtToken: this.getAuthToken(),
-                        },
-                        provider: this.modelSelector.value,
-                        properties: {}
-                    };
-
-                    if (!this.apiMode) {
-                        const obj = {
-                            documentId: localStorage.getItem('documentId'),
-                            type : "MULTI_FILE",
-                            clientId : "2000003"
+            try {
+                // Prepare the request
+                const formData = new FormData();
+                const payload = {
+                    messages: [
+                        {
+                            role: "user",
+                            content: userText,
                         }
-                        payload.properties = obj
+                    ],
+                    tools: [],
+                    context: {
+                        userId: this.getUserId(),
+                        requestId: this.requestId,
+                        sessionId: this.sessionId,
+                        jwtToken: this.getAuthToken(),
+                    },
+                    provider: this.modelSelector.value,
+                    properties: {}
+                };
+
+                if (!this.apiMode) {
+                    const obj = {
+                        documentId: localStorage.getItem('documentId'),
+                        type : "MULTI_FILE",
+                        clientId : "2000003"
                     }
+                    payload.properties = obj
+                }
 
-                    if (df !== '') {
-                        payload.messages.push({
-                            role: "system",
-                            content: df,
-                        });
-                    };
-                    
-                    // Add JSON payload to FormData
-                    formData.append('payload', JSON.stringify(payload));
+                if (df !== '') {
+                    payload.messages.push({
+                        role: "system",
+                        content: df,
+                    });
+                };
 
+                // Add JSON payload to FormData
+                formData.append('payload', JSON.stringify(payload));
 
-                    if (this.apiMode) {
-                        if (this.uploadedFiles.length === 0) {
-                            const dummyContent = new Blob(["Hello, this is dummy file content"], { type: "text/plain" });
-                            const dummyFile = new File([dummyContent], "dummy.txt", { type: "text/plain" });
-                            formData.append('files',dummyFile);
-                        } else {
-                            // Add all uploaded files
-                            this.uploadedFiles.forEach(file => {
-                              formData.append('files', file);
-                            });
-                        }
-                    } 
+                if (this.apiMode) {
+                    const dummyContent = new Blob(["Hello, this is dummy file content"], { type: "text/plain" });
+                    const dummyFile = new File([dummyContent], "dummy.txt", { type: "text/plain" });
+                    formData.append('files',dummyFile);
+                } else {
+                    // Add all uploaded files
+                    this.uploadedFiles.forEach(file => {
+                        formData.append('files', file);
+                    });
+                }
 
                 let url = this.chatApiEndpoint;
                 if (!this.apiMode) {
@@ -1156,71 +1181,51 @@
                     payload.context.sessionId = this.sessionId;
                 }
 
-                
+
 
                 // if (defaultPrompt !== '') {
                 //     userText = defaultPrompt;
                 // }
 
                 // Make API call
-                    const response = await fetch(url, {
-                        method: 'POST',
-                        body: formData,
-                        headers: {
-                            "Authorization": "Bearer " + this.getsSecretKey(),
-                        }
-                    });
-
-                    if (!response.ok) {
-                        throw new Error(`API request failed with status ${response.status}`);
+                const response = await fetch(url, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        "Authorization": "Bearer " + this.getsSecretKey(),
                     }
+                });
 
-                   const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(`API request failed with status ${response.status}`);
+                }
 
-//                const data1 = `{
-//   "text": "https://buddyai-dev-temp.s3.ap-south-1.amazonaws.com/4_ae8f2-a9ef-99f7-4807_monthly_payslip.pdf",
-//   "menu": null,
-//   "form": null,
-//   "link": "https://buddyai-dev-temp.s3.ap-south-1.amazonaws.com/4_ae8f2-a9ef-99f7-4807_monthly_payslip.pdf",
-//   "type": "DOWNLOADABLE",
-//   "downloadablePath": null,
-//   "complex": null,
-//   "uuId": "d0072b79-0969-4325-bed0-7179b3322022",
-//   "requestId": "ae8f2-a9ef-99f7-4807",
-//   "stateType": null
-// }`;
+                const data = await response.json();
+                // const data = JSON.parse(documentData); // Simulating API response for testing
+                console.log('API Response:', data);
 
-                    
-                    // const data = JSON.parse(documentData1); // Simulating API response for testing   
-                    // console.log('API Response:', data1);
-                    // const data = JSON.parse(data1);
-                    console.log('API Response:', data);
+                // Process the response
+                if (data) {
+                    const messageId = data.uuId;
+                    let botResponseContent = '';
 
-                    // const data = JSON.parse(documentData1); // Simulating API response for testing
-                    console.log('API Response:', data);
-                    // Process the response
-                    if (data) {
-                        const messageId = data.uuId;
-                        let botResponseContent = '';
+                    // Handle different response types
+                    if (data.type === "TEXT" && data.text && this.apiMode == true) {
+                        // Text response
+                        botResponseContent = this.renderMarkdown(data.text);
+                    } else if (data.type === "MENU") {
+                        botResponseContent = this.renderHtmlMenu(data.menu);
+                    } else if (data.choices && data.choices.length > 0 && data.choices[0].message) {
+                        // OpenAI-style response
+                        botResponseContent = this.renderMarkdown(data.choices[0].message.content);
+                    } else if (data.type === "COMPLEX" && data.complex) {
 
-                        // Handle different response types
-                        if (data.type === "TEXT" && data.text && this.apiMode == true) {
-                            // Text response
-                            botResponseContent = this.renderMarkdown(data.text);
-                        } else if (data.type === "MENU") {
-                            botResponseContent = this.renderHtmlMenu(data.menu);
-                        } else if (data.choices && data.choices.length > 0 && data.choices[0].message) {
-                            // OpenAI-style response
-                            botResponseContent = this.renderMarkdown(data.choices[0].message.content);
-                        } else if (data.type === "COMPLEX" && data.complex) {
-                            
-                            console.log('in complex');
 
-                            // IMAGES
-                            if (data.complex.metaData.type === "IMAGE" && data.complex.data && data.complex.data.length > 0) {
-                                botResponseContent = '<div class="response-images">';
-                                data.complex.data.forEach(image => {
-                                    botResponseContent += `
+                        // IMAGES
+                        if (data.complex.metaData.type === "IMAGE" && data.complex.data && data.complex.data.length > 0) {
+                            botResponseContent = '<div class="response-images">';
+                            data.complex.data.forEach(image => {
+                                botResponseContent += `
                                         <div class="response-media" style="margin-bottom: 20px;">
                                             <img src="${image.link}" alt="${image.photographer || 'Image'}" 
                                                 style="display: block; max-width: 100%; height: auto; border-radius: 8px;">
@@ -1248,16 +1253,16 @@
                                             </div>
                                         </div>
                                     `;
-                                });
-                                botResponseContent += '</div>';
-                            }
+                            });
+                            botResponseContent += '</div>';
+                        }
 
 
-                            // VIDEOS
-                            if (data.complex.metaData.type === "VIDEO" && data.complex.data && data.complex.data.length > 0) {
-                                botResponseContent = '<div class="response-videos">';
-                                data.complex.data.forEach((video, index) => {
-                                    botResponseContent += `
+                        // VIDEOS
+                        if (data.complex.metaData.type === "VIDEO" && data.complex.data && data.complex.data.length > 0) {
+                            botResponseContent = '<div class="response-videos">';
+                            data.complex.data.forEach((video, index) => {
+                                botResponseContent += `
                                         <div class="response-media" style="margin-bottom: 20px;">
                                             <video controls style="display: block; max-width: 100%; height: auto; border-radius: 8px;">
                                                 <source src="${video.link}" type="video/mp4">
@@ -1287,125 +1292,42 @@
                                             </div>
                                         </div>
                                     `;
-                                });
-                                botResponseContent += '</div>';  
-                            }
-
-
-                            // DOCUMENT
-                            if (data.complex.metaData.type === "TEXT") { 
-                                    const responseText = this.renderMarkdown(data.complex.data.response);
-                                    let referenceText = '';
-
-                                    if (data.complex.data.documents && data.complex.data.documents.length > 0) {
-                                        referenceText += `<div style="margin-top: 10px; font-size: 13px; color: gray;">Source(s):<br>`;
-                                        data.complex.data.documents.forEach((doc, index) => {
-                                            const pages = doc.pages.join(', ');
-                                            referenceText += `&bull; <strong>${doc.fileName}</strong> (Pages: ${pages})<br>`;
-                                        });
-                                        referenceText += `</div>`;
-                                    }
-
-                                    botResponseContent = responseText + referenceText;
-                            }
-
-                            // "DOCUMENT_UPLOAD_LIST"
-
-                            if (data.complex.metaData.type === "DOCUMENT_UPLOAD_LIST") { 
-                            console.log('in "DOCUMENT_UPLOAD_LIST"');
-
-                            const responseText = this.renderMarkdown(data.text);
-                          let referenceText = `
-                                <div style="margin-top: 10px; font-size: 13px; color: gray;">
-                                    <strong>Uploaded Documents:</strong><br>
-                                    <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
-                            `;
-
-                            if (data.complex.data && data.complex.data.length > 0) {
-                                data.complex.data.forEach(doc => {
-                                    const fileId = this.generateMessageId(); // unique ID
-                                    const fileName = doc.fileName;
-                                    const fileUrl = doc.fileUrl;
-
-                                    referenceText += `
-                                        <label for="${fileId}" style="
-                                            display: flex;
-                                            align-items: center;
-                                            background: var(--input-bg);
-                                            color: var(--input-text);
-                                            padding: 6px 10px;
-                                            border-radius: 18px;
-                                            font-size: 13px;
-                                            border: 1px solid var(--border-color);
-                                            gap: 6px;
-                                            cursor: pointer;
-                                             max-width: 50%;
-                                        ">
-                                            <input 
-                                                type="checkbox" 
-                                                id="${fileId}" 
-                                                value="${fileName}" 
-                                                style="margin-right: 6px;"
-                                            />
-                                            <span title="${fileName}" style="max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                                                ${fileName}
-                                            </span>
-                                            <a href="${fileUrl}" target="_blank" style="color: var(--accent-color); margin-left: 6px;">📄</a>
-                                        </label>
-                                    `;
-                                });
-                            }
-
-                            referenceText += `</div></div>`;
-                            botResponseContent = responseText + referenceText;
-
-                            // Delay DOM binding
-                            setTimeout(() => {
-                                const checkboxes = document.querySelectorAll('.bot-message input[type="checkbox"]');
-                                checkboxes.forEach(checkbox => {
-                                    checkbox.addEventListener('change', (e) => {
-                                        const name = e.target.value;
-                                        if (e.target.checked) {
-                                            if (!this.selectedDocumentFiles.includes(name)) {
-                                                this.selectedDocumentFiles.push(name);
-                                            }
-                                        } else {
-                                            this.selectedDocumentFiles = this.selectedDocumentFiles.filter(f => f !== name);
-                                        }
-                                        console.log("Selected file names:", this.selectedDocumentFiles.join(', '));
-                                        this.userInput.value = this.selectedDocumentFiles.join(', ');
-                                        this.sendButton.disabled = this.userInput.value.trim() === '';                                        
-                                    });
-                                });
-                            }, 100);
-                        }                         
-                        // "DOCUMENT_UPLOAD_LIST"
-                        } else if (data.type === "DOWNLOADABLE" && data.link) {
-                            console.log('in DOWNLOADABLE');
-                            // Handle downloadable link
-                            botResponseContent = `
-                                <div class="response-content">
-                                <img src='icons8-file-upload-51.png' alt='File Upload' style='width: 100px; height: 100px;margin-bottom: 2px'>
-                                <br/>
-                                <a href="${data.link}" style="color:white" target="_blank" class="response-download" download="${data.text || 'download'}">
-                                ${data.text.split("/").pop() || 'file'}
-                                    </a>
-                                </div>
-                            `;
+                            });
+                            botResponseContent += '</div>';
                         }
 
-                    
-                        // Handle media attachments in response
-                        if (data.attachments && data.attachments.length > 0) {
-                            data.attachments.forEach(attachment => {
-                                if (attachment.type.startsWith('image/')) {
-                                    botResponseContent += `
+
+                        // DOCUMENT
+                        if (data.complex.metaData.type === "TEXT") {
+                            const responseText = this.renderMarkdown(data.complex.data.response);
+                            let referenceText = '';
+
+                            if (data.complex.data.documents && data.complex.data.documents.length > 0) {
+                                referenceText += `<div style="margin-top: 10px; font-size: 13px; color: gray;">Source(s):<br>`;
+                                data.complex.data.documents.forEach((doc, index) => {
+                                    const pages = doc.pages.join(', ');
+                                    referenceText += `&bull; <strong>${doc.fileName}</strong> (Pages: ${pages})<br>`;
+                                });
+                                referenceText += `</div>`;
+                            }
+
+                            botResponseContent = responseText + referenceText;
+                        }
+
+                    }
+
+
+                    // Handle media attachments in response
+                    if (data.attachments && data.attachments.length > 0) {
+                        data.attachments.forEach(attachment => {
+                            if (attachment.type.startsWith('image/')) {
+                                botResponseContent += `
                                         <div class="response-media">
                                             <img src="${attachment.url}" alt="${attachment.name || 'Image'}">
                                         </div>
                                     `;
-                                } else if (attachment.type.startsWith('video/')) {
-                                    botResponseContent += `
+                            } else if (attachment.type.startsWith('video/')) {
+                                botResponseContent += `
                                         <div class="response-media">
                                             <video controls>
                                                 <source src="${attachment.url}" type="${attachment.type}">
@@ -1413,8 +1335,8 @@
                                             </video>
                                         </div>
                                     `;
-                                } else if (attachment.type.startsWith('audio/')) {
-                                    botResponseContent += `
+                            } else if (attachment.type.startsWith('audio/')) {
+                                botResponseContent += `
                                         <div class="response-media">
                                             <audio controls>
                                                 <source src="${attachment.url}" type="${attachment.type}">
@@ -1422,76 +1344,76 @@
                                             </audio>
                                         </div>
                                     `;
-                                } else if (attachment.type === 'application/pdf') {
-                                    botResponseContent += `
+                            } else if (attachment.type === 'application/pdf') {
+                                botResponseContent += `
                                         <div class="response-content">
                                             <a href="${attachment.url}" class="response-pdf" download="${attachment.name || 'document.pdf'}">
                                                 Download PDF: ${attachment.name || 'document.pdf'}
                                             </a>
                                         </div>
                                     `;
-                                }
-                            });
-                        }
-
-                        // Check for HTML content in response
-                        if (data.htmlMenu) {
-                            botResponseContent += this.renderHtmlMenu(data.htmlMenu);
-                        }
-
-                        // Add feedback buttons
-                        botResponseContent += this.renderFeedbackButtons(messageId);
-
-                        botMessage.innerHTML = botResponseContent;
-                        botMessage.dataset.messageId = messageId;
-
-
-                        document.querySelectorAll('.menu-link').forEach(link => {
-                            if (!link._clickListenerAdded) { 
-                                link.addEventListener('click', (e) => {
-                                    const name = e.currentTarget.getAttribute('data-name');
-                                    this.userInput.value = name;
-                                    this.sendMessage();
-                                });
-                                link._clickListenerAdded = true;
                             }
                         });
-
-                        // Store the message data for feedback tracking
-                        this.messageFeedback[messageId] = {
-                            message: data,
-                            feedback: null
-                        };
-                    } else {
-                        throw new Error('Invalid response format from API');
                     }
 
-                
-                    this.assignEventListenersToFeedbackButtons();
-                    // Clear uploaded files after successful send
-                    this.uploadedFiles = [];
-                    this.fileUpload.value = '';
+                    // Check for HTML content in response
+                    if (data.htmlMenu) {
+                        botResponseContent += this.renderHtmlMenu(data.htmlMenu);
+                    }
 
-                    document.getElementById('chatbotFileList').innerHTML = '';
+                    // Add feedback buttons
+                    botResponseContent += this.renderFeedbackButtons(messageId);
 
-                } catch (error) {
-                    console.error('API Error:', error);
-                    this.showError('Failed to get response from AI. Please try again.');
-                    botMessage.remove();
+                    botMessage.innerHTML = botResponseContent;
+                    botMessage.dataset.messageId = messageId;
+
+
+                    document.querySelectorAll('.menu-link').forEach(link => {
+                        if (!link._clickListenerAdded) {
+                            link.addEventListener('click', (e) => {
+                                const name = e.currentTarget.getAttribute('data-name');
+                                this.userInput.value = name;
+                                this.sendMessage();
+                            });
+                            link._clickListenerAdded = true;
+                        }
+                    });
+
+                    // Store the message data for feedback tracking
+                    this.messageFeedback[messageId] = {
+                        message: data,
+                        feedback: null
+                    };
+                } else {
+                    throw new Error('Invalid response format from API');
                 }
-            }
 
-            generateMessageId() {
-                return Date.now().toString(36) + Math.random().toString(36).substr(2);
+
+                this.assignEventListenersToFeedbackButtons();
+                // Clear uploaded files after successful send
+                this.uploadedFiles = [];
+                this.fileUpload.value = '';
+
+                document.getElementById('chatbotFileList').innerHTML = '';
+
+            } catch (error) {
+                console.error('API Error:', error);
+                this.showError('Failed to get response from AI. Please try again.');
+                botMessage.remove();
             }
+        }
+
+        generateMessageId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2);
+        }
 
         renderHtmlMenu(menuItems) {
-                if (!menuItems || !menuItems.length) return '';
+            if (!menuItems || !menuItems.length) return '';
 
-                let html = '<div class="chatbot-menu-preview"><strong>Menu Options:</strong><ul>';
+            let html = '<div class="chatbot-menu-preview"><strong>Menu Options:</strong><ul>';
 
-                menuItems.forEach(item => {
-                    html += `
+            menuItems.forEach(item => {
+                html += `
                             <li>
                                 <a style="cursor:pointer" class="menu-link" data-name="${item.name}">
                                     ${item.icon ? `<img src="${item.icon}" alt="" width="16">` : ''}
@@ -1499,14 +1421,14 @@
                                 </a>
                             </li>
                         `;
-                });
+            });
 
-                html += '</ul></div>';
-                return html;
-            }
+            html += '</ul></div>';
+            return html;
+        }
 
-            renderFeedbackButtons(messageId) {
-                return `
+        renderFeedbackButtons(messageId) {
+            return `
                     <div class="feedback-buttons">
                         <button class="feedback-button positive" data-message-id="${messageId}" aria-label="Positive feedback">
                             <svg width="13" height="13" viewBox="0 0 32 32" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
@@ -1528,214 +1450,214 @@
                         </button>
                     </div>
                 `;
-            }
+        }
 
-            async sendFeedback(messageId, isPositive) {
-                try {
-                    const feedbackData = this.messageFeedback[messageId];
-                    if (!feedbackData) return;
+        async sendFeedback(messageId, isPositive) {
+            try {
+                const feedbackData = this.messageFeedback[messageId];
+                if (!feedbackData) return;
 
-                    // Update local state
-                    feedbackData.feedback = isPositive ? 'positive' : 'negative';
+                // Update local state
+                feedbackData.feedback = isPositive ? 'positive' : 'negative';
                 let apiUrl = "";
-                    if( isPositive) {
-                        apiUrl = this.chatApiEndpoint + "thumbsUp/" + messageId ;
-                    }else {
-                        apiUrl = this.chatApiEndpoint + "thumbsDown/" + messageId ;
-                    }
-
-                    // Send feedback to server
-                    const response = await fetch(apiUrl, {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json',
-                            'Authorization': 'Bearer ' + this.getsSecretKey(),
-                        }
-                    });
-
-                    if (!response.ok) {
-                        console.error('Failed to send feedback');
-                    }
-
-                    // Update UI to show feedback was received
-                    const buttons = document.querySelectorAll(`.feedback-button[data-message-id="${messageId}"]`);
-                    buttons.forEach(button => {
-                        button.classList.remove('active');
-                    });
-
-                    const feedbackButton = document.querySelector(`.feedback-button.${feedbackData.feedback}[data-message-id="${messageId}"]`);
-                    if (feedbackButton) {
-                        feedbackButton.classList.add('active');
-                    }
-
-                } catch (error) {
-                    console.error('Feedback Error:', error);
+                if( isPositive) {
+                    apiUrl = this.chatApiEndpoint + "thumbsUp/" + messageId ;
+                }else {
+                    apiUrl = this.chatApiEndpoint + "thumbsDown/" + messageId ;
                 }
+
+                // Send feedback to server
+                const response = await fetch(apiUrl, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'Authorization': 'Bearer ' + this.getsSecretKey(),
+                    }
+                });
+
+                if (!response.ok) {
+                    console.error('Failed to send feedback');
+                }
+
+                // Update UI to show feedback was received
+                const buttons = document.querySelectorAll(`.feedback-button[data-message-id="${messageId}"]`);
+                buttons.forEach(button => {
+                    button.classList.remove('active');
+                });
+
+                const feedbackButton = document.querySelector(`.feedback-button.${feedbackData.feedback}[data-message-id="${messageId}"]`);
+                if (feedbackButton) {
+                    feedbackButton.classList.add('active');
+                }
+
+            } catch (error) {
+                console.error('Feedback Error:', error);
+            }
+        }
+
+        addMessage(sender, text) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}-message`;
+            messageDiv.setAttribute('role', 'listitem');
+
+            if (sender === 'bot' && text === '') {
+                // Loading indicator
+                messageDiv.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div>';
+            } else {
+                // Render content
+                messageDiv.innerHTML = text;
             }
 
-            addMessage(sender, text) {
-                const messageDiv = document.createElement('div');
-                messageDiv.className = `message ${sender}-message`;
-                messageDiv.setAttribute('role', 'listitem');
+            this.messagesContainer.appendChild(messageDiv);
+            this.scrollToBottom();
 
-                if (sender === 'bot' && text === '') {
-                    // Loading indicator
-                    messageDiv.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div>';
-                } else {
-                    // Render content
-                    messageDiv.innerHTML = text;
-                }
+            // Add feedback button handlers for bot messages
+            if (sender === 'bot') {
+                setTimeout(() => {
+                    const positiveButtons = messageDiv.querySelectorAll('.feedback-button.positive');
+                    const negativeButtons = messageDiv.querySelectorAll('.feedback-button.negative');
 
-                this.messagesContainer.appendChild(messageDiv);
-                this.scrollToBottom();
-
-                // Add feedback button handlers for bot messages
-                if (sender === 'bot') {
-                    setTimeout(() => {
-                        const positiveButtons = messageDiv.querySelectorAll('.feedback-button.positive');
-                        const negativeButtons = messageDiv.querySelectorAll('.feedback-button.negative');
-
-                        positiveButtons.forEach(button => {
-                            button.addEventListener('click', (e) => {
-                                const messageId = button.dataset.messageId;
-                                this.sendFeedback(messageId, true);
-                            });
+                    positiveButtons.forEach(button => {
+                        button.addEventListener('click', (e) => {
+                            const messageId = button.dataset.messageId;
+                            this.sendFeedback(messageId, true);
                         });
+                    });
 
-                        negativeButtons.forEach(button => {
-                            button.addEventListener('click', (e) => {
-                                const messageId = button.dataset.messageId;
-                                this.sendFeedback(messageId, false);
-                            });
+                    negativeButtons.forEach(button => {
+                        button.addEventListener('click', (e) => {
+                            const messageId = button.dataset.messageId;
+                            this.sendFeedback(messageId, false);
                         });
+                    });
 
                     const copyButtons = messageDiv.querySelectorAll('.feedback-button.copy');
-                        console.log('copyButtons', positiveButtons);
-                        copyButtons.forEach(button => {
-                            button.addEventListener('click', () => {
-                                const parentMessage = button.closest('.message');
-                                const textToCopy = parentMessage?.innerText || '';
-                                if (textToCopy) {
-                                    navigator.clipboard.writeText(textToCopy).then(() => {
+                    console.log('copyButtons', positiveButtons);
+                    copyButtons.forEach(button => {
+                        button.addEventListener('click', () => {
+                            const parentMessage = button.closest('.message');
+                            const textToCopy = parentMessage?.innerText || '';
+                            if (textToCopy) {
+                                navigator.clipboard.writeText(textToCopy).then(() => {
                                         this.showCopyMsg("Copied!");
                                         setTimeout(() => {
                                             this.clearCopyMsg();
                                         }, 2000);
                                     }
                                 ).catch(err => {
-                                        console.error("Failed to copy text:", err);
-                                    });
-                                }
-                            });
-                        });
-            
-                    }, 100);
-                }
-
-                return messageDiv;
-            }
-
-            renderMarkdown(text) {
-                // Bold: **text**
-                let html = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-                // Italic: *text*
-                html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
-                // Links: [text](url)
-                html = html.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
-                // Code blocks: ```code```
-                html = html.replace(/```([^`]+)```/g, '<pre><code>$1</code></pre>');
-                // Inline code: `code`
-                html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
-                // New lines
-                html = html.replace(/\n/g, '<br>');
-
-                return html;
-            }
-
-            scrollToBottom() {
-                this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
-            }
-
-            resetChat() {
-                this.clearChat();
-                this.sessionId = this.generateSessionId();
-                this.requestId = this.generateRequestId();
-                this.addMessage('bot', "Hello! I'm your AI assistant. How can I help you today?");
-                this.showCopyMsg("Chat has been reset");
-                setTimeout(() => {
-                    this.clearCopyMsg();
-                }, 2000);
-            }
-
-            //v2
-            assignEventListenersToFeedbackButtons() {
-                const positiveButtons = document.querySelectorAll('.feedback-button.positive');
-                const negativeButtons = document.querySelectorAll('.feedback-button.negative');
-                const copyButtons = document.querySelectorAll('.feedback-button.copy');
-
-                // Handle Positive Feedback
-                positiveButtons.forEach(button => {
-                    const newButton = button.cloneNode(true);
-                    button.parentNode.replaceChild(newButton, button);
-                    newButton.addEventListener('click', () => {
-                        const messageId = newButton.dataset.messageId;
-                        this.sendFeedback(messageId, true);
-                    });
-                });
-
-                // Handle Negative Feedback
-                negativeButtons.forEach(button => {
-                    const newButton = button.cloneNode(true);
-                    button.parentNode.replaceChild(newButton, button);
-                    newButton.addEventListener('click', () => {
-                        const messageId = newButton.dataset.messageId;
-                        this.sendFeedback(messageId, false);
-                    });
-                });
-
-                // Handle Copy Button
-                copyButtons.forEach(button => {
-                    const newButton = button.cloneNode(true);
-                    button.parentNode.replaceChild(newButton, button);
-                    newButton.addEventListener('click', () => {
-                        const parentMessage = newButton.closest('.message');
-                        const textToCopy = parentMessage?.innerText || '';
-                        if (textToCopy) {
-                            navigator.clipboard.writeText(textToCopy)
-                                .then(() => {
-                                    this.showCopyMsg("Copied!");
-                                    setTimeout(() => {
-                                        this.clearCopyMsg();
-                                    }, 2000);
-                                })
-                                .catch(err => {
                                     console.error("Failed to copy text:", err);
                                 });
-                        }
+                            }
+                        });
                     });
-                });
+
+                }, 100);
             }
 
-            forceDownloadImage(url, filename) {
-                fetch(url, { mode: 'cors' })
-                    .then(res => res.blob())
-                    .then(blob => {
-                        const blobUrl = URL.createObjectURL(blob);
-                        const link = document.createElement('a');
-                        link.href = blobUrl;
-                        link.download = filename;
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
-                        URL.revokeObjectURL(blobUrl);
-                    })
-                    .catch(() => alert('Image download failed. Server may block CORS.'));
-            }
-
+            return messageDiv;
         }
 
-        // Initialize the chatbot5
-        const chatbot = new Chatbot();
-        window.chatbot = chatbot;
-    });
+        renderMarkdown(text) {
+            // Bold: **text**
+            let html = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            // Italic: *text*
+            html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+            // Links: [text](url)
+            html = html.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+            // Code blocks: ```code```
+            html = html.replace(/```([^`]+)```/g, '<pre><code>$1</code></pre>');
+            // Inline code: `code`
+            html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+            // New lines
+            html = html.replace(/\n/g, '<br>');
+
+            return html;
+        }
+
+        scrollToBottom() {
+            this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
+        }
+
+        resetChat() {
+            this.clearChat();
+            this.sessionId = this.generateSessionId();
+            this.requestId = this.generateRequestId();
+            this.addMessage('bot', "Hello! I'm your AI assistant. How can I help you today?");
+            this.showCopyMsg("Chat has been reset");
+            setTimeout(() => {
+                this.clearCopyMsg();
+            }, 2000);
+        }
+
+        //v2
+        assignEventListenersToFeedbackButtons() {
+            const positiveButtons = document.querySelectorAll('.feedback-button.positive');
+            const negativeButtons = document.querySelectorAll('.feedback-button.negative');
+            const copyButtons = document.querySelectorAll('.feedback-button.copy');
+
+            // Handle Positive Feedback
+            positiveButtons.forEach(button => {
+                const newButton = button.cloneNode(true);
+                button.parentNode.replaceChild(newButton, button);
+                newButton.addEventListener('click', () => {
+                    const messageId = newButton.dataset.messageId;
+                    this.sendFeedback(messageId, true);
+                });
+            });
+
+            // Handle Negative Feedback
+            negativeButtons.forEach(button => {
+                const newButton = button.cloneNode(true);
+                button.parentNode.replaceChild(newButton, button);
+                newButton.addEventListener('click', () => {
+                    const messageId = newButton.dataset.messageId;
+                    this.sendFeedback(messageId, false);
+                });
+            });
+
+            // Handle Copy Button
+            copyButtons.forEach(button => {
+                const newButton = button.cloneNode(true);
+                button.parentNode.replaceChild(newButton, button);
+                newButton.addEventListener('click', () => {
+                    const parentMessage = newButton.closest('.message');
+                    const textToCopy = parentMessage?.innerText || '';
+                    if (textToCopy) {
+                        navigator.clipboard.writeText(textToCopy)
+                            .then(() => {
+                                this.showCopyMsg("Copied!");
+                                setTimeout(() => {
+                                    this.clearCopyMsg();
+                                }, 2000);
+                            })
+                            .catch(err => {
+                                console.error("Failed to copy text:", err);
+                            });
+                    }
+                });
+            });
+        }
+
+        forceDownloadImage(url, filename) {
+            fetch(url, { mode: 'cors' })
+                .then(res => res.blob())
+                .then(blob => {
+                    const blobUrl = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = blobUrl;
+                    link.download = filename;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(blobUrl);
+                })
+                .catch(() => alert('Image download failed. Server may block CORS.'));
+        }
+
+    }
+
+    // Initialize the chatbot5
+    const chatbot = new Chatbot();
+    window.chatbot = chatbot;
+});
