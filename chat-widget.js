@@ -1162,13 +1162,20 @@
                     // Add JSON payload to FormData
                     formData.append('payload', JSON.stringify(payload));
 
+
                     if (this.apiMode) {
-                        // Add all uploaded files
-                        this.uploadedFiles.forEach(file => {
-                            formData.append('files', file);
-                        });
-                    }
-                    
+                        if (this.uploadedFiles.length === 0) {
+                            const dummyContent = new Blob(["Hello, this is dummy file content"], { type: "text/plain" });
+                            const dummyFile = new File([dummyContent], "dummy.txt", { type: "text/plain" });
+                            formData.append('files',dummyFile);
+                        } else {
+                            // Add all uploaded files
+                            this.uploadedFiles.forEach(file => {
+                              formData.append('files', file);
+                            });
+                        }
+                    } 
+
                 let url = this.chatApiEndpoint;
                 if (!this.apiMode) {
                     url = this.docApiEndpoint;
