@@ -730,29 +730,6 @@
                         </button>
                         
                         <div class="chatbot-menu" id="fileMenu">
-                            <div class="menu-item" data-type="image">
-                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M4 16L8.586 11.414C8.961 11.039 9.47 10.828 10 10.828C10.53 10.828 11.039 11.039 11.414 11.414L16 16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                    <path d="M14 14L15.586 12.414C15.961 12.039 16.47 11.828 17 11.828C17.53 11.828 18.039 12.039 18.414 12.414L20 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                    <path d="M3 20H21C21.552 20 22 19.552 22 19V5C22 4.448 21.552 4 21 4H3C2.448 4 2 4.448 2 5V19C2 19.552 2.448 20 3 20Z" stroke="currentColor" stroke-width="2"/>
-                                </svg>
-                                <span>Image</span>
-                            </div>
-                            <div class="menu-item" data-type="video">
-                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M23 7L16 12L23 17V7Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                    <path d="M14 5H3C1.895 5 1 5.895 1 7V17C1 18.105 1.895 19 3 19H14C15.105 19 16 18.105 16 17V7C16 5.895 15.105 5 14 5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                </svg>
-                                <span>Video</span>
-                            </div>
-                            <div class="menu-item" data-type="audio">
-                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M12 1C10.343 1 9 2.343 9 4V12C9 13.657 10.343 15 12 15C13.657 15 15 13.657 15 12V4C15 2.343 13.657 1 12 1Z" stroke="currentColor" stroke-width="2"/>
-                                    <path d="M19 10V12C19 15.866 15.866 19 12 19C8.134 19 5 15.866 5 12V10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                                    <path d="M12 19V23" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                                </svg>
-                                <span>Audio</span>
-                            </div>
                             <div class="menu-item" data-type="pdf">
                                 <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M14 2H6C4.895 2 4 2.895 4 4V20C4 21.105 4.895 22 6 22H18C19.105 22 20 21.105 20 20V8L14 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -763,13 +740,6 @@
                                     <path d="M14 16H16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
                                 </svg>
                                 <span>PDF</span>
-                            </div>
-                            <div class="menu-item" data-type="html">
-                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M4 3H20L18.5 19.5L12 21L5.5 19.5L4 3Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                    <path d="M17 7H7.5L8 12H16.5L16 17L12 18L8 17L7.75 14.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                </svg>
-                                <span>HTML</span>
                             </div>
                         </div>
                     </div>
@@ -838,11 +808,7 @@
             this.chatApiEndpoint = 'https://'+env+'.api.chat.buddyai.in/v2/api/'+this.sId+'/chat/';
             this.docApiEndpoint = 'https://'+ env+'.api.chat.buddyai.in/v2/api/document/'+this.sId+'/chat/';
                 this.supportedFileTypes = {
-                    image: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
-                    video: ['video/mp4', 'video/webm', 'video/ogg'],
-                    audio: ['audio/mpeg', 'audio/ogg', 'audio/wav'],
-                    pdf: ['application/pdf'],
-                    html: ['text/html']
+                    pdf: ['application/pdf']
                 };
 
                 // Initialize state
