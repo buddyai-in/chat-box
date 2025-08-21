@@ -1517,7 +1517,7 @@
                 if (!data || !data.length) return '';
                 console.log(message)
 
-                let html = '<div class="chatbot-menu-preview"><strong>message: '+message+'</strong><ul>';
+                let html = '<div class="chatbot-menu-preview"><strong>'+message+'</strong><ul>';
 
                 data.forEach(item => {
                     html += `
