@@ -1217,7 +1217,8 @@
                             console.log('in complex');
 
                             // IMAGES
-                            if (data.complex.metaData.type === "IMAGE" && data.complex.data && data.complex.data.length > 0) {
+                            if (data.complex.metaData.type === "IMAGE"
+                                && data.complex.data && data.complex.data.length > 0) {
                                 botResponseContent = '<div class="response-images">';
                                 data.complex.data.forEach(image => {
                                     botResponseContent += `
@@ -1254,7 +1255,8 @@
 
 
                             // VIDEOS
-                            if (data.complex.metaData.type === "VIDEO" && data.complex.data && data.complex.data.length > 0) {
+                            if (data.complex.metaData.type === "VIDEO"
+                                && data.complex.data && data.complex.data.length > 0) {
                                 botResponseContent = '<div class="response-videos">';
                                 data.complex.data.forEach((video, index) => {
                                     botResponseContent += `
@@ -1309,76 +1311,80 @@
                                     botResponseContent = responseText + referenceText;
                             }
 
+                            if (data.complex.metaData.type === "LIST") {
+                                botResponseContent = this.renderHtmlMenuFromList(data.complex.data,
+                                    data.complex.metaData.message);
+                            }
+
                             // "DOCUMENT_UPLOAD_LIST"
 
                             if (data.complex.metaData.type === "DOCUMENT_UPLOAD_LIST") { 
-                            console.log('in "DOCUMENT_UPLOAD_LIST"');
+                                console.log('in "DOCUMENT_UPLOAD_LIST"');
+                                const responseText = this.renderMarkdown(data.text);
+                              let referenceText = `
+                                    <div style="margin-top: 10px; font-size: 13px; color: gray;">
+                                        <strong>Uploaded Documents:</strong><br>
+                                        <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
+                                `;
 
-                            const responseText = this.renderMarkdown(data.text);
-                          let referenceText = `
-                                <div style="margin-top: 10px; font-size: 13px; color: gray;">
-                                    <strong>Uploaded Documents:</strong><br>
-                                    <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
-                            `;
+                                if (data.complex.data && data.complex.data.length > 0) {
+                                    data.complex.data.forEach(doc => {
+                                        const fileId = this.generateMessageId(); // unique ID
+                                        const fileName = doc.fileName;
+                                        const fileUrl = doc.fileUrl;
 
-                            if (data.complex.data && data.complex.data.length > 0) {
-                                data.complex.data.forEach(doc => {
-                                    const fileId = this.generateMessageId(); // unique ID
-                                    const fileName = doc.fileName;
-                                    const fileUrl = doc.fileUrl;
-
-                                    referenceText += `
-                                        <label for="${fileId}" style="
-                                            display: flex;
-                                            align-items: center;
-                                            background: var(--input-bg);
-                                            color: var(--input-text);
-                                            padding: 6px 10px;
-                                            border-radius: 18px;
-                                            font-size: 13px;
-                                            border: 1px solid var(--border-color);
-                                            gap: 6px;
-                                            cursor: pointer;
-                                             max-width: 50%;
-                                        ">
-                                            <input 
-                                                type="checkbox" 
-                                                id="${fileId}" 
-                                                value="${fileName}" 
-                                                style="margin-right: 6px;"
-                                            />
-                                            <span title="${fileName}" style="max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                                                ${fileName}
-                                            </span>
-                                            <a href="${fileUrl}" target="_blank" style="color: var(--accent-color); margin-left: 6px;">📄</a>
-                                        </label>
-                                    `;
-                                });
-                            }
-
-                            referenceText += `</div></div>`;
-                            botResponseContent = responseText + referenceText;
-
-                            // Delay DOM binding
-                            setTimeout(() => {
-                                const checkboxes = document.querySelectorAll('.bot-message input[type="checkbox"]');
-                                checkboxes.forEach(checkbox => {
-                                    checkbox.addEventListener('change', (e) => {
-                                        const name = e.target.value;
-                                        if (e.target.checked) {
-                                            if (!this.selectedDocumentFiles.includes(name)) {
-                                                this.selectedDocumentFiles.push(name);
-                                            }
-                                        } else {
-                                            this.selectedDocumentFiles = this.selectedDocumentFiles.filter(f => f !== name);
-                                        }
-                                        console.log("Selected file names:", this.selectedDocumentFiles.join(', '));
-                                        this.userInput.value = this.selectedDocumentFiles.join(', ');
-                                        this.sendButton.disabled = this.userInput.value.trim() === '';                                        
+                                        referenceText += `
+                                            <label for="${fileId}" style="
+                                                display: flex;
+                                                align-items: center;
+                                                background: var(--input-bg);
+                                                color: var(--input-text);
+                                                padding: 6px 10px;
+                                                border-radius: 18px;
+                                                font-size: 13px;
+                                                border: 1px solid var(--border-color);
+                                                gap: 6px;
+                                                cursor: pointer;
+                                                 max-width: 50%;
+                                            ">
+                                                <input 
+                                                    type="checkbox" 
+                                                    id="${fileId}" 
+                                                    value="${fileName}" 
+                                                    style="margin-right: 6px;"
+                                                />
+                                                <span title="${fileName}" style="max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                                    ${fileName}
+                                                </span>
+                                                <a href="${fileUrl}" target="_blank" style="color: var(--accent-color); margin-left: 6px;">📄</a>
+                                            </label>
+                                        `;
                                     });
-                                });
-                            }, 100);
-                        }                         
+                                }
+
+                                referenceText += `</div></div>`;
+                                botResponseContent = responseText + referenceText;
+
+                                // Delay DOM binding
+                                setTimeout(() => {
+                                    const checkboxes = document.querySelectorAll('.bot-message input[type="checkbox"]');
+                                    checkboxes.forEach(checkbox => {
+                                        checkbox.addEventListener('change', (e) => {
+                                            const name = e.target.value;
+                                            if (e.target.checked) {
+                                                if (!this.selectedDocumentFiles.includes(name)) {
+                                                    this.selectedDocumentFiles.push(name);
+                                                }
+                                            } else {
+                                                this.selectedDocumentFiles = this.selectedDocumentFiles.filter(f => f !== name);
+                                            }
+                                            console.log("Selected file names:", this.selectedDocumentFiles.join(', '));
+                                            this.userInput.value = this.selectedDocumentFiles.join(', ');
+                                            this.sendButton.disabled = this.userInput.value.trim() === '';
+                                        });
+                                    });
+                                }, 100);
+                            }
                         // "DOCUMENT_UPLOAD_LIST"
                         } else if (data.type === "DOWNLOADABLE" && data.link) {
                             console.log('in DOWNLOADABLE');
@@ -1485,7 +1491,7 @@
                 return Date.now().toString(36) + Math.random().toString(36).substr(2);
             }
 
-        renderHtmlMenu(menuItems) {
+            renderHtmlMenu(menuItems) {
                 if (!menuItems || !menuItems.length) return '';
 
                 let html = '<div class="chatbot-menu-preview"><strong>Menu Options:</strong><ul>';
@@ -1496,6 +1502,25 @@
                                 <a style="cursor:pointer" class="menu-link" data-name="${item.name}">
                                     ${item.icon ? `<img src="${item.icon}" alt="" width="16">` : ''}
                                     ${item.name}
+                                </a>
+                            </li>
+                        `;
+                });
+
+                html += '</ul></div>';
+                return html;
+            }
+
+            renderHtmlMenuFromList(data,message) {
+                if (!data || !data.length) return '';
+
+                let html = '<div class="chatbot-menu-preview"><strong>message:</strong><ul>';
+
+                data.forEach(item => {
+                    html += `
+                            <li>
+                                <a style="cursor:pointer" class="menu-link" data-name="${item}"> 
+                                    ${item}
                                 </a>
                             </li>
                         `;
