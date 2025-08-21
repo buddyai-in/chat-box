@@ -1514,12 +1514,12 @@
             renderHtmlMenuFromList(data,message) {
                 if (!data || !data.length) return '';
 
-                let html = '<div class="chatbot-menu-preview"><strong>message: ${message}</strong><ul>';
+                let html = '<div class="chatbot-menu-preview"><strong>message: '+message+'</strong><ul>';
 
                 data.forEach(item => {
                     html += `
                             <li>
-                                <a style="cursor:pointer" class="menu-link" data-name="${item}"> 
+                                <a class="menu-link" data-name="${item}"> 
                                     ${item}
                                 </a>
                             </li>
