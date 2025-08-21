@@ -1522,8 +1522,8 @@
                 data.forEach(item => {
                     html += `
                             <li>
-                                <a class="menu-link" data-name="${item}"> 
-                                    ${item}
+                                <a style="cursor: pointer" class="menu-link" data-name="${item.key}"> 
+                                    ${item.value}
                                 </a>
                             </li>
                         `;
