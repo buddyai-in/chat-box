@@ -1312,6 +1312,8 @@
                             }
 
                             if (data.complex.metaData.type === "LIST") {
+                                console.log('in complex');
+                                console.log(JSON.stringify(data.complex.metaData) );
                                 botResponseContent = this.renderHtmlMenuFromList(data.complex.data,
                                     data.complex.metaData.message);
                             }
@@ -1513,6 +1515,7 @@
 
             renderHtmlMenuFromList(data,message) {
                 if (!data || !data.length) return '';
+                console.log(message)
 
                 let html = '<div class="chatbot-menu-preview"><strong>message: '+message+'</strong><ul>';
 
