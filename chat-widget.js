@@ -1130,7 +1130,7 @@
                             sessionId: this.sessionId,
                             companyCode: this.getCompanyName(),
                             jwtToken: this.getAuthToken(),
-                            roleId: this.roleId
+                            roleId: this.getRoleId(),
                         },
                         provider: this.modelSelector.value,
                         properties: {
