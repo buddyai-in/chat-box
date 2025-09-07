@@ -797,6 +797,8 @@
                 this.sessionId = this.generateSessionId();
                 this.requestId = this.generateRequestId();
                 this.companyName = this.getCompanyName();
+
+                this.roleId = this.getRoleId();
                 this.uploadedFiles = [];
                 this.messageFeedback = {};
                 this.selectedDocumentFiles = [];
@@ -915,10 +917,23 @@
                 return localStorage.getItem('company');
             }
 
+            getRoleId() {
+                // In a real implementation, you would get this from your auth system
+                return localStorage.getItem('roleId');
+            }
+
             getAuthToken() {
                 // In a real implementation, you would get this from your auth system
                 return localStorage.getItem('jwt');
             }
+
+            getGPSLocation() {
+                return localStorage.getItem('location') || "0,0";
+            }
+            getGPSCoordinates() {
+                return localStorage.getItem('coordinates') || "0,0";
+            }
+
 
             getsSecretKey() {
                 // In a real implementation, you would get this from your auth system
@@ -1102,6 +1117,10 @@
                             {
                                 role: "user",
                                 content: userText,
+                            },
+                            {
+                                role: "system",
+                                content: df,
                             }
                         ],
                         tools: [],
@@ -1111,9 +1130,21 @@
                             sessionId: this.sessionId,
                             companyCode: this.getCompanyName(),
                             jwtToken: this.getAuthToken(),
+                            roleId: this.roleId
                         },
                         provider: this.modelSelector.value,
-                        properties: {}
+                        properties: {
+                            "GPS_LOCATION":this.getGPSLocation(),
+                            "GPS_COORDINATE": this.getGPSCoordinates(),
+                            "CLIENT_IP":"",
+                            "USER_AGENT": navigator.userAgent,
+                            "DEVICE_TYPE": navigator.userAgent,
+                            "OS_TYPE": navigator.platform,
+                            "REFERRER_URL": window.location.href,
+                            "PAGE_URL": window.location.href,
+                            "CHANNEL":"WEBCHAT",
+                            "LOCATION":navigator.geolocation
+                        }
                     };
 
                     if (!this.apiMode) {
