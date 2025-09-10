@@ -7,7 +7,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <style>
         body {
-            background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+            background: #FFFDF2;
             min-height: 100vh;
             font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
             margin: 0;
@@ -17,67 +17,75 @@
             max-width: 480px;
             margin: 40px auto;
             padding: 32px 28px 24px 28px;
-            background: #232946;
+            background: #FFFDF2;
             border-radius: 18px;
-            box-shadow: 0 8px 32px 0 rgba(35, 41, 70, 0.18), 0 1.5px 6px 0 rgba(0,0,0,0.08);
-            border: 1px solid #b8c1ec;
+            box-shadow: 0 8px 32px 0 rgba(0,0,0,0.08), 0 1.5px 6px 0 rgba(0,0,0,0.06);
+            border: 1.5px solid #e0e0e0;
         }
         .form-container h2 {
             text-align: center;
-            color: #eebbc3;
+            color: #000000;
             margin-bottom: 24px;
             font-weight: 700;
             letter-spacing: 1px;
+            background: #FFFDF2;
+            padding: 18px 0 14px 0;
+            border-radius: 12px 12px 0 0;
+            box-shadow: 0 2px 8px 0 rgba(0,0,0,0.04);
+            border-bottom: 1.5px solid #e0e0e0;
         }
         label, .form-label {
-            color: #b8c1ec !important;
+            color: #888888 !important;
             font-size: 15px;
             font-weight: 500;
         }
         input, select {
             width: 100%;
             padding: 10px 12px;
-            border: 1.5px solid #b8c1ec;
+            border: 1.5px solid #e0e0e0;
             border-radius: 7px;
             font-size: 15px;
-            background: #121629;
-            color: #eebbc3;
+            background: #fff;
+            color: #888888;
             transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
             outline: none;
         }
         input:focus, select:focus {
-            border-color: #eebbc3;
-            box-shadow: 0 0 0 2px #eebbc355;
-            background: #232946;
+            border-color: #000000;
+            box-shadow: 0 0 0 2px #00000022;
+            background: #FFFDF2;
+            color: #000000;
         }
         .btn-primary {
-            background: linear-gradient(90deg, #eebbc3 0%, #b8c1ec 100%);
-            color: #232946;
+            background: #000000;
+            color: #FFFDF2;
             border: none;
             font-weight: 600;
         }
         .btn-primary:hover {
-            background: linear-gradient(90deg, #b8c1ec 0%, #eebbc3 100%);
-            color: #232946;
+            background: #222222;
+            color: #FFFDF2;
         }
         .btn-outline-secondary {
-            border-color: #b8c1ec;
-            color: #b8c1ec;
+            border-color: #000000;
+            color: #000000;
         }
         .btn-outline-secondary:hover {
-            background: #eebbc3;
-            color: #232946;
-            border-color: #eebbc3;
+            background: #000000;
+            color: #FFFDF2;
+            border-color: #000000;
         }
         .btn-danger {
-            background: #e54b4b;
+            background: #888888;
             border: none;
+            color: #FFFDF2;
         }
         .btn-danger:hover {
-            background: #ff7675;
+            background: #000000;
+            color: #FFFDF2;
         }
         .form-control::placeholder {
-            color: #b8c1ec;
+            color: #bbbbbb;
             opacity: 0.7;
         }
         @media (max-width: 700px) {
