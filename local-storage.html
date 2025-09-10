@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Information Form</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <style>
         body {
             background: linear-gradient(135deg, #e0e7ff 0%, #f8fafc 100%);
@@ -90,78 +91,79 @@
         }
     </style>
 </head>
-<body>
-<div class="form-container">
-    <h2>User Information</h2>
-    <form id="userForm">
-        <div class="form-row">
-            <div class="form-group">
-                <label for="userId">User ID:</label>
-                <input type="text" id="userId" required>
+<body class="bg-light">
+<div class="container py-5">
+    <div class="form-container shadow-lg rounded-4 bg-white p-4 mx-auto" style="max-width: 540px;">
+        <h2 class="mb-4 text-center fw-bold text-primary">User Information</h2>
+        <form id="userForm">
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <label for="userId" class="form-label">User ID</label>
+                    <input type="text" class="form-control" id="userId" required>
+                </div>
+                <div class="col-md-6">
+                    <label for="userName" class="form-label">User Name</label>
+                    <input type="text" class="form-control" id="userName" required>
+                </div>
             </div>
-            <div class="form-group">
-                <label for="userName">User Name:</label>
-                <input type="text" id="userName" required>
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <label for="companyName" class="form-label">Company Name</label>
+                    <input type="text" class="form-control" id="companyName" required>
+                </div>
+                <div class="col-md-6">
+                    <label for="apiKey" class="form-label">API Key</label>
+                    <input type="text" class="form-control" id="apiKey" required>
+                </div>
             </div>
-        </div>
-        <div class="form-row">
-            <div class="form-group">
-                <label for="companyName">Company Name:</label>
-                <input type="text" id="companyName" required>
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <label for="documentId" class="form-label">Document ID</label>
+                    <input type="text" class="form-control" id="documentId" required>
+                </div>
+                <div class="col-md-6">
+                    <label for="sid" class="form-label">Secret Id</label>
+                    <input type="text" class="form-control" id="sid" required>
+                </div>
             </div>
-            <div class="form-group">
-                <label for="apiKey">API Key:</label>
-                <input type="text" id="apiKey" required>
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <label for="sKey" class="form-label">Secret Key</label>
+                    <input type="text" class="form-control" id="sKey" required>
+                </div>
+                <div class="col-md-6">
+                    <label for="token" class="form-label">Token</label>
+                    <input type="text" class="form-control" id="token" required>
+                </div>
             </div>
-        </div>
-        <div class="form-row">
-            <div class="form-group">
-                <label for="documentId">Document ID:</label>
-                <input type="text" id="documentId" required>
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <label for="roleId" class="form-label">Role Id</label>
+                    <input type="text" class="form-control" id="roleId" required>
+                </div>
+                <div class="col-md-6">
+                    <label for="location" class="form-label">GPS Location</label>
+                    <input type="text" class="form-control" id="location" required>
+                </div>
             </div>
-            <div class="form-group">
-                <label for="sid">Secret Id:</label>
-                <input type="text" id="sid" required/>
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <label for="coordinates" class="form-label">GPS Coordinates</label>
+                    <input type="text" class="form-control" id="coordinates" required>
+                </div>
+                <div class="col-md-6">
+                    <label for="profile" class="form-label">Profile</label>
+                    <select id="profile" class="form-select" required>
+                        <option value="">Select environment</option>
+                        <option value="uat">UAT</option>
+                        <option value="dev">DEV</option>
+                    </select>
+                </div>
             </div>
-        </div>
-        <div class="form-row">
-            <div class="form-group">
-                <label for="sKey">Secret Key:</label>
-                <input type="text" id="sKey" required/>
-            </div>
-            <div class="form-group">
-                <label for="token">Token:</label>
-                <input type="text" id="token" required/>
-            </div>
-        </div>
-        <div class="form-row">
-            <div class="form-group">
-                <label for="roleId">Role Id:</label>
-                <input type="text" id="roleId" required/>
-            </div>
-            <div class="form-group">
-                <label for="location">GPS Location:</label>
-                <input type="text" id="location" required/>
-            </div>
-        </div>
-        <div class="form-row">
-            <div class="form-group">
-                <label for="coordinates">GPS Coordinates:</label>
-                <input type="text" id="coordinates" required/>
-            </div>
-            <div class="form-group">
-                <label for="profile">Profile:</label>
-                <select id="profile" required>
-                    <option value="">Select environment</option>
-                    <option value="uat">UAT</option>
-                    <option value="dev">DEV</option>
-                </select>
-            </div>
-        </div>
-        <button type="submit">Save Information</button>
-    </form>
+            <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold">Save Information</button>
+        </form>
+    </div>
 </div>
-
 <script>
     document.getElementById('userForm').addEventListener('submit', function(e) {
         e.preventDefault();
