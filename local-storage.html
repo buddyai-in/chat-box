@@ -5,36 +5,88 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Information Form</title>
     <style>
+        body {
+            background: linear-gradient(135deg, #e0e7ff 0%, #f8fafc 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
         .form-container {
-            max-width: 400px;
-            margin: 20px auto;
-            padding: 20px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
+            max-width: 480px;
+            margin: 40px auto;
+            padding: 32px 28px 24px 28px;
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.12), 0 1.5px 6px 0 rgba(0,0,0,0.04);
+            border: 1px solid #e5e7eb;
+        }
+        .form-container h2 {
+            text-align: center;
+            color: #1e293b;
+            margin-bottom: 24px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        .form-row {
+            display: flex;
+            gap: 18px;
+            margin-bottom: 18px;
         }
         .form-group {
-            margin-bottom: 15px;
+            flex: 1 1 0;
+            margin-bottom: 0;
         }
-        label {
+        .form-group label {
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 6px;
+            color: #334155;
+            font-size: 15px;
+            font-weight: 500;
         }
         input, select {
             width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            padding: 10px 12px;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 7px;
+            font-size: 15px;
+            background: #f1f5f9;
+            color: #1e293b;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            outline: none;
+        }
+        input:focus, select:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 2px #6366f133;
+            background: #fff;
         }
         button {
-            background-color: #4CAF50;
+            background: linear-gradient(90deg, #6366f1 0%, #4f46e5 100%);
             color: white;
-            padding: 10px 15px;
+            padding: 12px 0;
             border: none;
-            border-radius: 4px;
+            border-radius: 7px;
             cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            width: 100%;
+            margin-top: 8px;
+            box-shadow: 0 2px 8px 0 rgba(99,102,241,0.08);
+            transition: background 0.2s, box-shadow 0.2s;
         }
         button:hover {
-            background-color: #45a049;
+            background: linear-gradient(90deg, #4f46e5 0%, #6366f1 100%);
+            box-shadow: 0 4px 16px 0 rgba(99,102,241,0.13);
+        }
+        @media (max-width: 700px) {
+            .form-container {
+                padding: 18px 6vw 16px 6vw;
+                max-width: 98vw;
+            }
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
         }
     </style>
 </head>
@@ -42,59 +94,69 @@
 <div class="form-container">
     <h2>User Information</h2>
     <form id="userForm">
-        <div class="form-group">
-            <label for="userId">User ID:</label>
-            <input type="text" id="userId" required>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="userId">User ID:</label>
+                <input type="text" id="userId" required>
+            </div>
+            <div class="form-group">
+                <label for="userName">User Name:</label>
+                <input type="text" id="userName" required>
+            </div>
         </div>
-        <div class="form-group">
-            <label for="userName">User Name:</label>
-            <input type="text" id="userName" required>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="companyName">Company Name:</label>
+                <input type="text" id="companyName" required>
+            </div>
+            <div class="form-group">
+                <label for="apiKey">API Key:</label>
+                <input type="text" id="apiKey" required>
+            </div>
         </div>
-        <div class="form-group">
-            <label for="userName">Company Name:</label>
-            <input type="text" id="companyName" required>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="documentId">Document ID:</label>
+                <input type="text" id="documentId" required>
+            </div>
+            <div class="form-group">
+                <label for="sid">Secret Id:</label>
+                <input type="text" id="sid" required/>
+            </div>
         </div>
-        <div class="form-group">
-            <label for="apiKey">API Key:</label>
-            <input type="text" id="apiKey" required>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="sKey">Secret Key:</label>
+                <input type="text" id="sKey" required/>
+            </div>
+            <div class="form-group">
+                <label for="token">Token:</label>
+                <input type="text" id="token" required/>
+            </div>
         </div>
-        <div class="form-group">
-            <label for="documentId">Document ID:</label>
-            <input type="text" id="documentId" required>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="roleId">Role Id:</label>
+                <input type="text" id="roleId" required/>
+            </div>
+            <div class="form-group">
+                <label for="location">GPS Location:</label>
+                <input type="text" id="location" required/>
+            </div>
         </div>
-        <div class="form-group">
-            <label for="sid">Secret Id:</label>
-            <input type="text" id="sid" required/>
-        </div>
-        <div class="form-group">
-            <label for="sKey">Secret Key:</label>
-            <input type="text" id="sKey" required/>
-        </div>
-        <div class="form-group">
-            <label for="token">Token:</label>
-            <input type="text" id="token" required/>
-        </div>
-        <div class="form-group">
-            <label for="token">Role Id:</label>
-            <input type="text" id="roleId" required/>
-        </div>
-
-        <div class="form-group">
-            <label for="token">GPS Location:</label>
-            <input type="text" id="location" required/>
-        </div>
-
-        <div class="form-group">
-            <label for="token">GPS Coordinates:</label>
-            <input type="text" id="coordinates" required/>
-        </div>
-        <div class="form-group">
-            <label for="profile">Profile:</label>
-            <select id="profile" required>
-                <option value="">Select environment</option>
-                <option value="uat">UAT</option>
-                <option value="dev">DEV</option>
-            </select>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="coordinates">GPS Coordinates:</label>
+                <input type="text" id="coordinates" required/>
+            </div>
+            <div class="form-group">
+                <label for="profile">Profile:</label>
+                <select id="profile" required>
+                    <option value="">Select environment</option>
+                    <option value="uat">UAT</option>
+                    <option value="dev">DEV</option>
+                </select>
+            </div>
         </div>
         <button type="submit">Save Information</button>
     </form>
