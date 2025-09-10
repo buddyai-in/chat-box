@@ -160,11 +160,41 @@
                     </select>
                 </div>
             </div>
+            <div id="dynamicFields"></div>
+            <div class="d-flex justify-content-end mb-3">
+                <button type="button" class="btn btn-outline-secondary" id="addFieldBtn">+ Add Field</button>
+            </div>
             <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold">Save Information</button>
         </form>
     </div>
 </div>
 <script>
+    // Dynamic field logic
+    let dynamicFieldCount = 0;
+    document.getElementById('addFieldBtn').addEventListener('click', function() {
+        dynamicFieldCount++;
+        const dynamicFields = document.getElementById('dynamicFields');
+        const fieldId = `dynamicField${dynamicFieldCount}`;
+        const labelId = `dynamicLabel${dynamicFieldCount}`;
+        const row = document.createElement('div');
+        row.className = 'row g-3 mb-3 align-items-end';
+        row.innerHTML = `
+            <div class="col-md-5">
+                <input type="text" class="form-control" placeholder="Field Name" id="${labelId}" required>
+            </div>
+            <div class="col-md-5">
+                <input type="text" class="form-control" placeholder="Field Value" id="${fieldId}" required>
+            </div>
+            <div class="col-md-2 text-end">
+                <button type="button" class="btn btn-danger btn-sm remove-field">Remove</button>
+            </div>
+        `;
+        dynamicFields.appendChild(row);
+        row.querySelector('.remove-field').addEventListener('click', function() {
+            row.remove();
+        });
+    });
+
     document.getElementById('userForm').addEventListener('submit', function(e) {
         e.preventDefault();
 
@@ -197,6 +227,15 @@
         localStorage.setItem('location', location);
         localStorage.setItem('coordinates', coordinates);
 
+        // Save dynamic fields to localStorage
+        const dynamicFields = document.getElementById('dynamicFields').querySelectorAll('.row');
+        dynamicFields.forEach(row => {
+            const key = row.querySelector('input[placeholder="Field Name"]').value;
+            const value = row.querySelector('input[placeholder="Field Value"]').value;
+            if(key) {
+                localStorage.setItem(key, value);
+            }
+        });
         alert('Information saved successfully!');
     });
 
