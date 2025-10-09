@@ -158,8 +158,8 @@
                 // Configuration
                 let env = localStorage.getItem('profile');
                 
-            //this.chatApiEndpoint = 'https://'+env+'.api.chat.buddyai.in/v2/api/'+this.sId+'/chat/';
-			this.chatApiEndpoint = 'http://localhost/v2/api/'+this.sId+'/chat/';
+            this.chatApiEndpoint = 'https://'+env+'.api.chat.buddyai.in/v2/api/'+this.sId+'/chat/';
+			//this.chatApiEndpoint = 'http://localhost/v2/api/'+this.sId+'/chat/';
             this.docApiEndpoint = 'https://'+ env+'.api.chat.buddyai.in/v2/api/document/'+this.sId+'/chat/';
                 this.supportedFileTypes = {
                     pdf: ['application/pdf']
