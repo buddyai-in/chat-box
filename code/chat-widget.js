@@ -1640,19 +1640,36 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         forceDownloadImage(url, filename) {
-            fetch(url, { mode: 'cors' })
-                .then(res => res.blob())
-                .then(blob => {
-                    const blobUrl = URL.createObjectURL(blob);
+            // Check if URL is a base64 data URL
+            if (url.startsWith('data:')) {
+                try {
+                    // Extract the base64 data and convert to blob
                     const link = document.createElement('a');
-                    link.href = blobUrl;
+                    link.href = url;
                     link.download = filename;
                     document.body.appendChild(link);
                     link.click();
                     document.body.removeChild(link);
-                    URL.revokeObjectURL(blobUrl);
-                })
-                .catch(() => alert('Image download failed. Server may block CORS.'));
+                } catch (error) {
+                    console.error('Download failed:', error);
+                    alert('File download failed.');
+                }
+            } else {
+                // Handle regular URLs with fetch
+                fetch(url, { mode: 'cors' })
+                    .then(res => res.blob())
+                    .then(blob => {
+                        const blobUrl = URL.createObjectURL(blob);
+                        const link = document.createElement('a');
+                        link.href = blobUrl;
+                        link.download = filename;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        URL.revokeObjectURL(blobUrl);
+                    })
+                    .catch(() => alert('Image download failed. Server may block CORS.'));
+            }
         }
 
     }
