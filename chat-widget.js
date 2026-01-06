@@ -97,6 +97,7 @@
                     <select class="model-selector" id="chatbotModelSelector" aria-label="Select AI model" style="align-self:end">
                         <option value="OPENAI">OpenAI</option>  
                         <option value="DEEPSEEK">DeepSeek</option> 
+						<option value="GEMINI" selected >GEMINI</option> 
                     </select>
                     
                     <button class="send-button" id="chatbotSendButton" aria-label="Send message" disabled>
