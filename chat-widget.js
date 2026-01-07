@@ -779,7 +779,7 @@
                                 <img src='icons8-file-upload-51.png' alt='File Upload' style='width: 100px; height: 100px;margin-bottom: 2px'>
                                 <br/>
                                 <a href="${data.link}" style="color:white" target="_blank" class="response-download" download="${data.text || 'download'}">
-                                ${data.text.split("/").pop() || 'file'}
+                                Click Here To Download
                                     </a>
                                 </div>
                             `;
