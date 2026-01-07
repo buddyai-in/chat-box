@@ -705,7 +705,8 @@
 
                             if (data.complex.metaData.type === "DOCUMENT_UPLOAD_LIST") { 
                                 console.log('in "DOCUMENT_UPLOAD_LIST"');
-                                const responseText = this.renderMarkdown(data.text);
+								
+                                const responseText ='';
                               let referenceText = `
                                     <div style="margin-top: 10px; font-size: 13px; color: gray;">
                                         <strong>Uploaded Documents:</strong><br>
