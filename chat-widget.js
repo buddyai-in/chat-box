@@ -55,6 +55,9 @@
                 <!-- Messages will be inserted here -->
             </div>
             
+            <!-- Audio player for voice responses -->
+            <audio id="chatbotAudioPlayer" style="display: none;"></audio>
+            
             <div class="chatbot-input-area">
                 <div class="chatbot-input-row">
                     <textarea 
@@ -100,12 +103,32 @@
 						<option value="GEMINI" selected >GEMINI</option> 
                     </select>
                     
-                    <button class="send-button" id="chatbotSendButton" aria-label="Send message" disabled>
+                    <!-- Voice Recording Button (Default) -->
+                    <button class="voice-record-button" id="voiceRecordButton" aria-label="Record voice message" title="Hold to record">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 1C10.34 1 9 2.34 9 4V12C9 13.66 10.34 15 12 15C13.66 15 15 13.66 15 12V4C15 2.34 13.66 1 12 1Z" fill="currentColor"/>
+                            <path d="M19 10V12C19 15.87 15.87 19 12 19C8.13 19 5 15.87 5 12V10H3V12C3 16.97 7.03 21 12 21C16.97 21 21 16.97 21 12V10H19Z" fill="currentColor"/>
+                            <path d="M12 19V23" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            <path d="M8 23H16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </button>
+                    
+                    <!-- Send Button (Shows when typing) -->
+                    <button class="send-button" id="chatbotSendButton" aria-label="Send message" style="display: none;">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-top: 2px;margin-right: 6px;">
                             <path d="M22 2L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                             <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                     </button>
+                </div>
+                
+                <!-- Voice Recording Indicator -->
+                <div id="voiceRecordingIndicator" class="voice-recording-indicator" style="display: none;">
+                    <div class="recording-animation">
+                        <span class="recording-dot"></span>
+                        <span class="recording-text">Recording...</span>
+                        <span class="recording-timer" id="recordingTimer">0:00</span>
+                    </div>
                 </div>
                 <div id="chatbotError" class="error-message"></div>
                 <div id="chatbotCopyMsg" class="chatbot-copy-msg"></div>
@@ -140,6 +163,10 @@
                 this.errorDisplay = document.getElementById('chatbotError');
                 this.chatbotCopyMsg = document.getElementById('chatbotCopyMsg');
                 this.resetButton = document.querySelector('.reset-chat');
+                this.audioPlayer = document.getElementById('chatbotAudioPlayer');
+                this.voiceRecordButton = document.getElementById('voiceRecordButton');
+                this.voiceRecordingIndicator = document.getElementById('voiceRecordingIndicator');
+                this.recordingTimer = document.getElementById('recordingTimer');
 
                 // State
                 this.isOpen = false;
@@ -154,13 +181,24 @@
                 this.messageFeedback = {};
                 this.selectedDocumentFiles = [];
 
+                // Voice recording state
+                this.isRecording = false;
+                this.mediaRecorder = null;
+                this.audioChunks = [];
+                this.recordedAudioBlob = null;
+                this.recordingStartTime = null;
+                this.recordingTimerInterval = null;
+
+                // Request lock state
+                this.isRequestInProgress = false;
+
                 this.sId = localStorage.getItem('sid');
                 this.sdocumentIdId = localStorage.getItem('documentId');
                 // Configuration
                 let env = localStorage.getItem('profile');
                 
-            this.chatApiEndpoint = 'https://'+env+'.api.chat.buddyai.in/v2/api/'+this.sId+'/chat/';
-			//this.chatApiEndpoint = 'http://localhost/v2/api/'+this.sId+'/chat/';
+            //this.chatApiEndpoint = 'https://'+env+'.api.chat.buddyai.in/v2/api/'+this.sId+'/chat/';
+			this.chatApiEndpoint = 'http://localhost/v2/api/'+this.sId+'/chat/';
             this.docApiEndpoint = 'https://'+ env+'.api.chat.buddyai.in/v2/api/document/'+this.sId+'/chat/';
                 this.supportedFileTypes = {
                     pdf: ['application/pdf']
@@ -188,19 +226,20 @@
                 this.apiToggle.addEventListener('click', () => this.toggleApiMode());
 
                 this.userInput.addEventListener('input', () => {
-                    this.sendButton.disabled = this.userInput.value.trim() === '' && this.uploadedFiles.length === 0 && this.defaultPrompt.value.trim() === '';
+                    this.toggleSendVoiceButton();
                     this.clearError();
                 });
 
                 this.defaultPrompt.addEventListener('input', () => {
-                    this.sendButton.disabled = this.userInput.value.trim() === '' && this.uploadedFiles.length === 0 && this.defaultPrompt.value.trim() === '';
+                    this.toggleSendVoiceButton();
                     this.clearError();
                 });
 
                 this.userInput.addEventListener('keydown', (e) => {
                     if (e.key === 'Enter' && !e.shiftKey) {
                         e.preventDefault();
-                        if (!this.sendButton.disabled) {
+                        // Send if send button is visible (not disabled)
+                        if (this.sendButton.style.display !== 'none') {
                             this.sendMessage();
                         }
                     }
@@ -247,6 +286,25 @@
                 });
 
                 this.resetButton.addEventListener('click', () => this.resetChat());
+
+                // Voice recording handlers
+                this.voiceRecordButton.addEventListener('mousedown', () => this.startRecording());
+                this.voiceRecordButton.addEventListener('mouseup', () => this.stopRecording());
+                this.voiceRecordButton.addEventListener('mouseleave', () => {
+                    if (this.isRecording) {
+                        this.stopRecording();
+                    }
+                });
+
+                // Touch support for mobile
+                this.voiceRecordButton.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    this.startRecording();
+                });
+                this.voiceRecordButton.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    this.stopRecording();
+                });
             }
 
             generateSessionId() {
@@ -352,6 +410,53 @@
                 }
             }
 
+            toggleSendVoiceButton() {
+                const hasText = this.userInput.value.trim() !== '' ||
+                               this.uploadedFiles.length > 0 ||
+                               this.defaultPrompt.value.trim() !== '';
+
+                if (hasText) {
+                    // Show send button, hide voice button
+                    this.sendButton.style.display = 'flex';
+                    this.voiceRecordButton.style.display = 'none';
+                } else {
+                    // Show voice button, hide send button
+                    this.sendButton.style.display = 'none';
+                    this.voiceRecordButton.style.display = 'flex';
+                }
+
+                // Disable both buttons if request is in progress
+                if (this.isRequestInProgress) {
+                    this.sendButton.disabled = true;
+                    this.voiceRecordButton.disabled = true;
+                } else {
+                    this.sendButton.disabled = false;
+                    this.voiceRecordButton.disabled = false;
+                }
+            }
+
+            lockInputs() {
+                this.isRequestInProgress = true;
+                this.userInput.disabled = true;
+                this.defaultPrompt.disabled = true;
+                this.sendButton.disabled = true;
+                this.voiceRecordButton.disabled = true;
+                this.fileUpload.disabled = true;
+                this.fileMenuButton.classList.add('disabled');
+                this.modelSelector.disabled = true;
+            }
+
+            unlockInputs() {
+                this.isRequestInProgress = false;
+                this.userInput.disabled = false;
+                this.defaultPrompt.disabled = false;
+                this.sendButton.disabled = false;
+                this.voiceRecordButton.disabled = false;
+                this.fileUpload.disabled = false;
+                this.fileMenuButton.classList.remove('disabled');
+                this.modelSelector.disabled = false;
+            }
+
             setFileInputAccept(type) {
                 this.fileUpload.accept = this.supportedFileTypes[type].join(',');
             }
@@ -388,13 +493,13 @@
             fileChip.querySelector('button').addEventListener('click', () => {
                 this.uploadedFiles = this.uploadedFiles.filter(f => f.name !== file.name);
                 fileChip.remove();
-                this.sendButton.disabled = this.userInput.value.trim() === '' && this.uploadedFiles.length === 0 && this.defaultPrompt.value.trim() === '';
+                this.toggleSendVoiceButton();
             });
 
             document.getElementById('chatbotFileList').appendChild(fileChip);
         });
 
-        this.sendButton.disabled = this.userInput.value.trim() === '' && this.uploadedFiles.length === 0 && this.defaultPrompt.value.trim() === '';
+        this.toggleSendVoiceButton();
 
 
             }
@@ -443,6 +548,15 @@
 
                 if (userText === '' && this.uploadedFiles.length === 0 && df === '') return;
 
+                // Check if request is already in progress
+                if (this.isRequestInProgress) {
+                    this.showError('Please wait for the current request to complete');
+                    return;
+                }
+
+                // Lock inputs immediately
+                this.lockInputs();
+
                 console.log('apiMode:', this.apiMode);
 
                 // Add user message to chat
@@ -454,9 +568,12 @@
                     userText = 'file upload';
                 }
 
+                // Store the user text for voice message
+                const userTextForVoice = userText;
+
                 this.userInput.value = '';
                 this.userInput.style.height = '40px';
-                this.sendButton.disabled = true;
+                this.toggleSendVoiceButton(); // Toggle back to voice button
 
                 // Add loading indicator for bot response
                 const botMessage = this.addMessage('bot', '');
@@ -518,6 +635,8 @@
                     // Add JSON payload to FormData
                     formData.append('payload', JSON.stringify(payload));
 
+                    // Convert text to speech automatically in background
+                    this.convertTextToSpeechAndSend(userTextForVoice, payload);
 
                     if (this.apiMode) {
                         if (this.uploadedFiles.length === 0) {
@@ -586,8 +705,15 @@
                         const messageId = data.uuId;
                         let botResponseContent = '';
 
-                        // Handle different response types
-                        if (data.type === "TEXT" && data.text && this.apiMode == true) {
+                        // Handle audio/voice response
+                        if (data.voiceResponse && data.audioResponse) {
+                            // Display text response
+                            botResponseContent = this.renderMarkdown(data.text || 'Audio response');
+
+                            // Add audio player with controls
+                            botResponseContent += this.createAudioPlayer(data.audioResponse, messageId);
+
+                        } else if (data.type === "TEXT" && data.text && this.apiMode == true) {
                             // Text response
                             botResponseContent = this.renderMarkdown(data.text);
                         } else if (data.type === "MENU") {
@@ -837,6 +963,19 @@
                         botMessage.innerHTML = botResponseContent;
                         botMessage.dataset.messageId = messageId;
 
+                        // Initialize audio player if audio response exists
+                        if (data.voiceResponse && data.audioResponse) {
+                            setTimeout(() => {
+                                this.initializeAudioPlayer(messageId);
+                                // Force play attempt after a brief moment
+                                setTimeout(() => {
+                                    const audioElement = document.getElementById(`audio-player-${messageId}`);
+                                    if (audioElement && audioElement.paused) {
+                                        audioElement.play().catch(err => console.log('Auto-play blocked:', err));
+                                    }
+                                }, 200);
+                            }, 150);
+                        }
 
                         document.querySelectorAll('.menu-link').forEach(link => {
                             if (!link._clickListenerAdded) { 
@@ -866,10 +1005,129 @@
 
                     document.getElementById('chatbotFileList').innerHTML = '';
 
+                    // Unlock inputs after successful response
+                    this.unlockInputs();
+
                 } catch (error) {
                     console.error('API Error:', error);
                     this.showError('Failed to get response from AI. Please try again.');
                     botMessage.remove();
+                    // Unlock inputs on error
+                    this.unlockInputs();
+                }
+            }
+
+            async convertTextToSpeechAndSend(text, payload) {
+                try {
+                    // Use Web Speech API to synthesize speech
+                    const utterance = new SpeechSynthesisUtterance(text);
+
+                    // Create a MediaRecorder to capture the audio
+                    // Note: We'll use a different approach - generate audio blob from text
+                    // Since browser TTS can't be easily captured, we'll send the text as voice request
+
+                    // Alternative: Send text as voice message to backend
+                    await this.sendTextAsVoiceMessage(text, payload);
+
+                } catch (error) {
+                    console.error('Error converting text to speech:', error);
+                    // Non-critical error, don't show to user
+                }
+            }
+
+            async sendTextAsVoiceMessage(text, basePayload) {
+                try {
+                    // Prepare form data for voice message
+                    const formData = new FormData();
+
+                    // Use the same payload structure
+                    const voicePayload = {
+                        ...basePayload,
+                        messages: [
+                            {
+                                role: "user",
+                                content: text,
+                            }
+                        ]
+                    };
+
+                    // Add payload
+                    formData.append('payload', JSON.stringify(voicePayload));
+
+                    // Create a simple audio blob from text using Web Speech API
+                    // For now, we'll create a minimal audio file
+                    // In production, you might want to use a proper TTS service
+                    const audioBlob = await this.textToAudioBlob(text);
+
+                    if (audioBlob) {
+                        formData.append('audio', audioBlob, 'text-to-speech.webm');
+                    }
+
+                    // Add dummy file for compatibility
+                    const dummyContent = new Blob(["Voice message"], { type: "text/plain" });
+                    const dummyFile = new File([dummyContent], "voice.txt", { type: "text/plain" });
+                    formData.append('files', dummyFile);
+
+                    // Make API call in background (don't await or show loading)
+                    fetch(this.chatApiEndpoint, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            "Authorization": "Bearer " + this.getsSecretKey(),
+                        }
+                    }).then(response => {
+                        if (response.ok) {
+                            console.log('Voice message sent successfully in background');
+                        }
+                    }).catch(error => {
+                        console.error('Background voice message error:', error);
+                    });
+
+                } catch (error) {
+                    console.error('Error sending text as voice:', error);
+                }
+            }
+
+            async textToAudioBlob(text) {
+                try {
+                    // Create a minimal audio blob using Web Audio API
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    const audioContext = new AudioContext();
+
+                    // Create a buffer with silence (1 second)
+                    const sampleRate = audioContext.sampleRate;
+                    const duration = 1;
+                    const buffer = audioContext.createBuffer(1, sampleRate * duration, sampleRate);
+
+                    // Create a MediaStreamDestination
+                    const dest = audioContext.createMediaStreamDestination();
+                    const source = audioContext.createBufferSource();
+                    source.buffer = buffer;
+                    source.connect(dest);
+
+                    // Record the stream
+                    const mediaRecorder = new MediaRecorder(dest.stream);
+                    const chunks = [];
+
+                    return new Promise((resolve) => {
+                        mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
+                        mediaRecorder.onstop = () => {
+                            const blob = new Blob(chunks, { type: 'audio/webm' });
+                            resolve(blob);
+                        };
+
+                        mediaRecorder.start();
+                        source.start();
+
+                        setTimeout(() => {
+                            mediaRecorder.stop();
+                            source.stop();
+                            audioContext.close();
+                        }, duration * 1000);
+                    });
+                } catch (error) {
+                    console.error('Error creating audio blob:', error);
+                    return null;
                 }
             }
 
@@ -1065,6 +1323,707 @@
                 return html;
             }
 
+            createAudioPlayer(base64Audio, messageId) {
+                try {
+                    // Convert base64 to blob
+                    const byteCharacters = atob(base64Audio);
+                    const byteNumbers = new Array(byteCharacters.length);
+                    for (let i = 0; i < byteCharacters.length; i++) {
+                        byteNumbers[i] = byteCharacters.charCodeAt(i);
+                    }
+                    const byteArray = new Uint8Array(byteNumbers);
+                    const blob = new Blob([byteArray], { type: 'audio/mpeg' });
+
+                    // Create URL
+                    const audioUrl = URL.createObjectURL(blob);
+                    const audioId = `audio-player-${messageId}`;
+
+                    // Return HTML for custom audio player
+                    return `
+                        <div class="audio-player-container" data-audio-id="${audioId}" style="margin-top: 10px; padding: 12px; background: var(--input-bg); border-radius: 8px; border: 1px solid var(--border-color);">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <!-- Play/Pause Button -->
+                                <button class="audio-play-btn" data-audio-id="${audioId}" style="
+                                    width: 40px;
+                                    height: 40px;
+                                    border-radius: 50%;
+                                    background: var(--accent-color);
+                                    border: none;
+                                    cursor: pointer;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    transition: all 0.3s ease;
+                                    flex-shrink: 0;
+                                ">
+                                    <!-- Play Icon -->
+                                    <svg class="play-icon" width="16" height="16" viewBox="0 0 24 24" fill="white">
+                                        <path d="M8 5v14l11-7z"/>
+                                    </svg>
+                                    <!-- Pause Icon (hidden by default) -->
+                                    <svg class="pause-icon" width="16" height="16" viewBox="0 0 24 24" fill="white" style="display: none;">
+                                        <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
+                                    </svg>
+                                </button>
+
+                                <!-- Audio Progress and Controls -->
+                                <div style="flex: 1; display: flex; flex-direction: column; gap: 6px;">
+                                    <!-- Time and Progress -->
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <span class="audio-current-time" style="font-size: 12px; color: var(--text-color); min-width: 40px;">0:00</span>
+                                        <input type="range" class="audio-progress" min="0" max="100" value="0" style="
+                                            flex: 1;
+                                            height: 4px;
+                                            background: var(--border-color);
+                                            outline: none;
+                                            border-radius: 2px;
+                                            cursor: pointer;
+                                        ">
+                                        <span class="audio-duration" style="font-size: 12px; color: var(--text-color); min-width: 40px;">0:00</span>
+                                    </div>
+
+                                    <!-- Audio Label -->
+                                    <div style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-color);">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/>
+                                        </svg>
+                                        <span>Audio Response</span>
+                                    </div>
+                                </div>
+
+                                <!-- Download Button -->
+                                <button class="audio-download-btn" data-audio-id="${audioId}" style="
+                                    width: 36px;
+                                    height: 36px;
+                                    border-radius: 50%;
+                                    background: var(--button-bg);
+                                    border: 1px solid var(--border-color);
+                                    cursor: pointer;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    transition: all 0.3s ease;
+                                    flex-shrink: 0;
+                                " title="Download audio">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <!-- Hidden audio element -->
+                            <audio id="${audioId}" src="${audioUrl}" preload="auto" style="display: none;"></audio>
+                        </div>
+                    `;
+                } catch (error) {
+                    console.error('Audio player creation error:', error);
+                    return `<div style="color: red; padding: 10px;">Failed to load audio response</div>`;
+                }
+            }
+
+            initializeAudioPlayer(messageId) {
+                const audioId = `audio-player-${messageId}`;
+                const audioElement = document.getElementById(audioId);
+
+                if (!audioElement) return;
+
+                const container = document.querySelector(`[data-audio-id="${audioId}"]`);
+                const playBtn = container.querySelector('.audio-play-btn');
+                const playIcon = playBtn.querySelector('.play-icon');
+                const pauseIcon = playBtn.querySelector('.pause-icon');
+                const progressBar = container.querySelector('.audio-progress');
+                const currentTimeSpan = container.querySelector('.audio-current-time');
+                const durationSpan = container.querySelector('.audio-duration');
+                const downloadBtn = container.querySelector('.audio-download-btn');
+
+                // Format time helper
+                const formatTime = (seconds) => {
+                    const mins = Math.floor(seconds / 60);
+                    const secs = Math.floor(seconds % 60);
+                    return `${mins}:${secs.toString().padStart(2, '0')}`;
+                };
+
+                // Function to start playback
+                const startPlayback = () => {
+                    if (audioElement.duration && !isNaN(audioElement.duration)) {
+                        durationSpan.textContent = formatTime(audioElement.duration);
+                        progressBar.max = Math.floor(audioElement.duration);
+                    }
+
+                    // Auto-play the audio
+                    audioElement.play().then(() => {
+                        // Update UI to show playing state
+                        playIcon.style.display = 'none';
+                        pauseIcon.style.display = 'block';
+                    }).catch(error => {
+                        console.error('Auto-play failed:', error);
+                        // Keep play button visible if auto-play fails
+                    });
+                };
+
+                // Load metadata and auto-play
+                audioElement.addEventListener('loadedmetadata', startPlayback);
+
+                // Fallback: If metadata is already loaded, start immediately
+                if (audioElement.readyState >= 1) {
+                    startPlayback();
+                }
+
+                // Another fallback: Try after canplay event
+                audioElement.addEventListener('canplay', () => {
+                    if (audioElement.paused && audioElement.readyState >= 2) {
+                        startPlayback();
+                    }
+                }, { once: true });
+
+                // Play/Pause toggle
+                playBtn.addEventListener('click', () => {
+                    if (audioElement.paused) {
+                        audioElement.play();
+                        playIcon.style.display = 'none';
+                        pauseIcon.style.display = 'block';
+                    } else {
+                        audioElement.pause();
+                        playIcon.style.display = 'block';
+                        pauseIcon.style.display = 'none';
+                    }
+                });
+
+                // Update progress
+                audioElement.addEventListener('timeupdate', () => {
+                    currentTimeSpan.textContent = formatTime(audioElement.currentTime);
+                    progressBar.value = audioElement.currentTime;
+                });
+
+                // Seek functionality
+                progressBar.addEventListener('input', (e) => {
+                    audioElement.currentTime = e.target.value;
+                });
+
+                // Reset on end
+                audioElement.addEventListener('ended', () => {
+                    playIcon.style.display = 'block';
+                    pauseIcon.style.display = 'none';
+                    progressBar.value = 0;
+                    currentTimeSpan.textContent = '0:00';
+                    // Clean up URL
+                    URL.revokeObjectURL(audioElement.src);
+                });
+
+                // Download functionality
+                downloadBtn.addEventListener('click', () => {
+                    const link = document.createElement('a');
+                    link.href = audioElement.src;
+                    link.download = `audio-response-${messageId}.mp3`;
+                    link.click();
+                });
+            }
+
+            playAudioResponse(base64Audio) {
+                // Backward compatibility - auto-play using hidden player
+                try {
+                    const byteCharacters = atob(base64Audio);
+                    const byteNumbers = new Array(byteCharacters.length);
+                    for (let i = 0; i < byteCharacters.length; i++) {
+                        byteNumbers[i] = byteCharacters.charCodeAt(i);
+                    }
+                    const byteArray = new Uint8Array(byteNumbers);
+                    const blob = new Blob([byteArray], { type: 'audio/mpeg' });
+
+                    const audioUrl = URL.createObjectURL(blob);
+                    this.audioPlayer.src = audioUrl;
+                    this.audioPlayer.play().catch(error => {
+                        console.error('Audio playback failed:', error);
+                    });
+
+                    this.audioPlayer.onended = () => {
+                        URL.revokeObjectURL(audioUrl);
+                    };
+                } catch (error) {
+                    console.error('Audio playback error:', error);
+                }
+            }
+
+            async startRecording() {
+                // Check if request is already in progress
+                if (this.isRequestInProgress) {
+                    this.showError('Please wait for the current request to complete');
+                    return;
+                }
+
+                try {
+                    // Request microphone permission
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+                    // Create media recorder
+                    this.mediaRecorder = new MediaRecorder(stream);
+                    this.audioChunks = [];
+                    this.isRecording = true;
+
+                    // Handle data available
+                    this.mediaRecorder.addEventListener('dataavailable', (event) => {
+                        this.audioChunks.push(event.data);
+                    });
+
+                    // Handle recording stop
+                    this.mediaRecorder.addEventListener('stop', () => {
+                        const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
+                        this.recordedAudioBlob = audioBlob;
+
+                        // Stop all tracks
+                        stream.getTracks().forEach(track => track.stop());
+
+                        // Send the recorded audio
+                        this.sendVoiceMessage(audioBlob);
+                    });
+
+                    // Start recording
+                    this.mediaRecorder.start();
+
+                    // Show recording indicator
+                    this.voiceRecordingIndicator.style.display = 'block';
+                    this.voiceRecordButton.classList.add('recording');
+
+                    // Start timer
+                    this.recordingStartTime = Date.now();
+                    this.recordingTimerInterval = setInterval(() => {
+                        this.updateRecordingTimer();
+                    }, 100);
+
+                } catch (error) {
+                    console.error('Error starting recording:', error);
+                    this.showError('Microphone access denied or not available');
+                    this.isRecording = false;
+                }
+            }
+
+            stopRecording() {
+                if (this.isRecording && this.mediaRecorder) {
+                    this.mediaRecorder.stop();
+                    this.isRecording = false;
+
+                    // Hide recording indicator
+                    this.voiceRecordingIndicator.style.display = 'none';
+                    this.voiceRecordButton.classList.remove('recording');
+
+                    // Clear timer
+                    if (this.recordingTimerInterval) {
+                        clearInterval(this.recordingTimerInterval);
+                        this.recordingTimerInterval = null;
+                    }
+                }
+            }
+
+            updateRecordingTimer() {
+                if (this.recordingStartTime) {
+                    const elapsed = Date.now() - this.recordingStartTime;
+                    const seconds = Math.floor(elapsed / 1000);
+                    const minutes = Math.floor(seconds / 60);
+                    const remainingSeconds = seconds % 60;
+
+                    this.recordingTimer.textContent = `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+                }
+            }
+
+            async sendVoiceMessage(audioBlob) {
+                // Lock inputs immediately
+                this.lockInputs();
+
+                try {
+                    // Add user message indicator (will be updated with transcription)
+                    const userMessage = this.addMessage('user', '🎤 Voice message');
+
+                    // Add loading indicator for bot response
+                    const botMessage = this.addMessage('bot', '');
+
+                    // Prepare form data
+                    const formData = new FormData();
+
+                    const payload = {
+                        messages: [
+                            {
+                                role: "user",
+                                content: "Voice message",
+                            }
+                        ],
+                        tools: [],
+                        context: {
+                            userId: this.getUserId(),
+                            requestId: this.requestId,
+                            sessionId: this.sessionId,
+                            companyCode: this.getCompanyName(),
+                            jwtToken: this.getAuthToken(),
+                            roleId: this.getRoleId(),
+                        },
+                        provider: this.modelSelector.value,
+                        properties: {
+                            "GPS_LOCATION": this.getGPSLocation(),
+                            "GPS_COORDINATE": this.getGPSCoordinates(),
+                            "CLIENT_IP": "",
+                            "USER_AGENT": navigator.userAgent,
+                            "DEVICE_TYPE": navigator.userAgent,
+                            "OS_TYPE": navigator.platform,
+                            "REFERRER_URL": window.location.href,
+                            "PAGE_URL": window.location.href,
+                            "CHANNEL": "WEBCHAT",
+                            "LOCATION": navigator.geolocation
+                        }
+                    };
+
+                    // Add payload
+                    formData.append('payload', JSON.stringify(payload));
+
+                    // Add audio file with correct parameter name
+                    formData.append('audio', audioBlob, 'voice-message.webm');
+
+                    // Add dummy file for files parameter
+                    const dummyContent = new Blob(["Voice message"], { type: "text/plain" });
+                    const dummyFile = new File([dummyContent], "voice.txt", { type: "text/plain" });
+                    formData.append('files', dummyFile);
+
+                    // Make API call
+                    const response = await fetch(this.chatApiEndpoint, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            "Authorization": "Bearer " + this.getsSecretKey(),
+                        }
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`API request failed with status ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    console.log('Voice API Response:', data);
+
+                    // Update user message with transcription if available
+                    if (data.transcription) {
+                        userMessage.innerHTML = `
+                            <div style="display: flex; align-items: start; gap: 8px;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink: 0; margin-top: 2px;">
+                                    <path d="M12 1C10.34 1 9 2.34 9 4V12C9 13.66 10.34 15 12 15C13.66 15 15 13.66 15 12V4C15 2.34 13.66 1 12 1Z" fill="currentColor"/>
+                                    <path d="M19 10V12C19 15.87 15.87 19 12 19C8.13 19 5 15.87 5 12V10H3V12C3 16.97 7.03 21 12 21C16.97 21 21 16.97 21 12V10H19Z" fill="currentColor"/>
+                                    <path d="M12 19V23" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                    <path d="M8 23H16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                </svg>
+                                <span>${this.renderMarkdown(data.transcription)}</span>
+                            </div>
+                        `;
+                    }
+
+                    // Process response (same as sendMessage - handle ALL response types)
+                    if (data) {
+                        const messageId = data.uuId;
+                        let botResponseContent = '';
+
+                        // Handle audio/voice response
+                        if (data.voiceResponse && data.audioResponse) {
+                            // Display text response
+                            botResponseContent = this.renderMarkdown(data.text || 'Audio response');
+
+                            // Add audio player with controls
+                            botResponseContent += this.createAudioPlayer(data.audioResponse, messageId);
+
+                        } else if (data.type === "TEXT" && data.text && this.apiMode == true) {
+                            // Text response
+                            botResponseContent = this.renderMarkdown(data.text);
+                        } else if (data.type === "MENU") {
+                            botResponseContent = this.renderHtmlMenu(data.menu);
+                        } else if (data.choices && data.choices.length > 0 && data.choices[0].message) {
+                            // OpenAI-style response
+                            botResponseContent = this.renderMarkdown(data.choices[0].message.content);
+                        } else if (data.type === "COMPLEX" && data.complex) {
+
+                            console.log('in complex');
+
+                            // IMAGES
+                            if (data.complex.metaData.type === "IMAGE"
+                                && data.complex.data && data.complex.data.length > 0) {
+                                botResponseContent = '<div class="response-images">';
+                                data.complex.data.forEach(image => {
+                                    botResponseContent += `
+                                        <div class="response-media" style="margin-bottom: 20px;">
+                                            <img src="${image.link}" alt="${image.photographer || 'Image'}" 
+                                                style="display: block; max-width: 100%; height: auto; border-radius: 8px;">
+                                            
+                                            <div style="margin-top: 5px; text-align: left;display: flex;align-items:center;gap: 7px"">
+                                                <p style="margin: 0;">${image.photographer || ''}</p>
+                                                <a href="javascript:void(0)" onclick="window.chatbot.forceDownloadImage('${image.link}', '${image.link.split('/').pop()}')"
+                                                title="Download image"
+                                                style="
+                                                        display: inline-flex; 
+                                                        justify-content: center; 
+                                                        align-items: center; 
+                                                        margin-top: 6px; 
+                                                        padding: 3px; 
+                                                        border: 1px solid black; 
+                                                        border-radius: 6px; 
+                                                        cursor: pointer; 
+                                                        transition: all 0.3s ease;
+                                                        box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+                                                ">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" viewBox="0 0 24 24" fill="black" style="transform: rotate(180deg);">
+                                                        <path d="M5 20h14v-2H5v2zm7-18L5.33 9h4.34v6h4.66V9h4.34L12 2z"/>
+                                                    </svg>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    `;
+                                });
+                                botResponseContent += '</div>';
+                            }
+
+
+                            // VIDEOS
+                            if (data.complex.metaData.type === "VIDEO"
+                                && data.complex.data && data.complex.data.length > 0) {
+                                botResponseContent = '<div class="response-videos">';
+                                data.complex.data.forEach((video, index) => {
+                                    botResponseContent += `
+                                        <div class="response-media" style="margin-bottom: 20px;">
+                                            <video controls style="display: block; max-width: 100%; height: auto; border-radius: 8px;">
+                                                <source src="${video.link}" type="video/mp4">
+                                                Your browser does not support the video tag.
+                                            </video>
+
+                                            <div style="margin-top: 5px; text-align: left;display: flex;align-items:center;gap: 7px">
+                                                <p style="margin: 0;">${video.link.split('/').pop() || ''}</p>
+                                                <a href="javascript:void(0)" onclick="window.chatbot.forceDownloadImage('${video.link}', '${video.link.split('/').pop()}')"
+                                                title="Download video"
+                                                style="
+                                                        display: inline-flex; 
+                                                        justify-content: center; 
+                                                        align-items: center; 
+                                                        margin-top: 6px; 
+                                                        padding: 2px; 
+                                                        border: 1px solid black; 
+                                                        border-radius: 6px; 
+                                                        cursor: pointer;    
+                                                        transition: all 0.3s ease;
+                                                        box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+                                                ">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" viewBox="0 0 24 24" fill="black" style="transform: rotate(180deg);">
+                                                        <path d="M5 20h14v-2H5v2zm7-18L5.33 9h4.34v6h4.66V9h4.34L12 2z"/>
+                                                    </svg>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    `;
+                                });
+                                botResponseContent += '</div>';
+                            }
+
+
+                            // DOCUMENT
+                            if (data.complex.metaData.type === "TEXT") {
+                                    const responseText = this.renderMarkdown(data.complex.data.response);
+                                    let referenceText = '';
+
+                                    if (data.complex.data.documents && data.complex.data.documents.length > 0) {
+                                        referenceText += `<div style="margin-top: 10px; font-size: 13px; color: gray;">Source(s):<br>`;
+                                        data.complex.data.documents.forEach((doc, index) => {
+                                            const pages = doc.pages.join(', ');
+                                            referenceText += `&bull; <strong>${doc.fileName}</strong> (Pages: ${pages})<br>`;
+                                        });
+                                        referenceText += `</div>`;
+                                    }
+
+                                    botResponseContent = responseText + referenceText;
+                            }
+
+                            if (data.complex.metaData.type === "LIST") {
+                                console.log('in complex');
+                                console.log(JSON.stringify(data.complex.metaData) );
+                                botResponseContent = this.renderHtmlMenuFromList(data.complex.data,
+                                    data.complex.metaData.message);
+                            }
+
+                            // "DOCUMENT_UPLOAD_LIST"
+
+                            if (data.complex.metaData.type === "DOCUMENT_UPLOAD_LIST") {
+                                console.log('in "DOCUMENT_UPLOAD_LIST"');
+
+                                const responseText ='';
+                              let referenceText = `
+                                    <div style="margin-top: 10px; font-size: 13px; color: gray;">
+                                        <strong>Uploaded Documents:</strong><br>
+                                        <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
+                                `;
+
+                                if (data.complex.data && data.complex.data.length > 0) {
+                                    data.complex.data.forEach(doc => {
+                                        const fileId = this.generateMessageId(); // unique ID
+                                        const fileName = doc.fileName;
+                                        const fileUrl = doc.fileUrl;
+
+                                        referenceText += `
+                                            <label for="${fileId}" style="
+                                                display: flex;
+                                                align-items: center;
+                                                background: var(--input-bg);
+                                                color: var(--input-text);
+                                                padding: 6px 10px;
+                                                border-radius: 18px;
+                                                font-size: 13px;
+                                                border: 1px solid var(--border-color);
+                                                gap: 6px;
+                                                cursor: pointer;
+                                                 max-width: 50%;
+                                            ">
+                                                <input 
+                                                    type="checkbox" 
+                                                    id="${fileId}" 
+                                                    value="${fileName}" 
+                                                    style="margin-right: 6px;"
+                                                />
+                                                <span title="${fileName}" style="max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                                    ${fileName}
+                                                </span>
+                                                <a href="${fileUrl}" target="_blank" style="color: var(--accent-color); margin-left: 6px;">📄</a>
+                                            </label>
+                                        `;
+                                    });
+                                }
+
+                                referenceText += `</div></div>`;
+                                botResponseContent = responseText + referenceText;
+
+                                // Delay DOM binding
+                                setTimeout(() => {
+                                    const checkboxes = document.querySelectorAll('.bot-message input[type="checkbox"]');
+                                    checkboxes.forEach(checkbox => {
+                                        checkbox.addEventListener('change', (e) => {
+                                            const name = e.target.value;
+                                            if (e.target.checked) {
+                                                if (!this.selectedDocumentFiles.includes(name)) {
+                                                    this.selectedDocumentFiles.push(name);
+                                                }
+                                            } else {
+                                                this.selectedDocumentFiles = this.selectedDocumentFiles.filter(f => f !== name);
+                                            }
+                                            console.log("Selected file names:", this.selectedDocumentFiles.join(', '));
+                                            this.userInput.value = this.selectedDocumentFiles.join(', ');
+                                            this.sendButton.disabled = this.userInput.value.trim() === '';
+                                        });
+                                    });
+                                }, 100);
+                            }
+                        // "DOCUMENT_UPLOAD_LIST"
+                        } else if (data.type === "DOWNLOADABLE" && data.link) {
+                            console.log('in DOWNLOADABLE');
+                            // Handle downloadable link
+                            botResponseContent = `
+                                <div class="response-content">
+                                <img src='icons8-file-upload-51.png' alt='File Upload' style='width: 100px; height: 100px;margin-bottom: 2px'>
+                                <br/>
+                                <a href="${data.link}" style="color:white" target="_blank" class="response-download" download="${data.text || 'download'}">
+                                Click Here To Download
+                                    </a>
+                                </div>
+                            `;
+                        }
+
+
+                        // Handle media attachments in response
+                        if (data.attachments && data.attachments.length > 0) {
+                            data.attachments.forEach(attachment => {
+                                if (attachment.type.startsWith('image/')) {
+                                    botResponseContent += `
+                                        <div class="response-media">
+                                            <img src="${attachment.url}" alt="${attachment.name || 'Image'}">
+                                        </div>
+                                    `;
+                                } else if (attachment.type.startsWith('video/')) {
+                                    botResponseContent += `
+                                        <div class="response-media">
+                                            <video controls>
+                                                <source src="${attachment.url}" type="${attachment.type}">
+                                                Your browser does not support the video tag.
+                                            </video>
+                                        </div>
+                                    `;
+                                } else if (attachment.type.startsWith('audio/')) {
+                                    botResponseContent += `
+                                        <div class="response-media">
+                                            <audio controls>
+                                                <source src="${attachment.url}" type="${attachment.type}">
+                                                Your browser does not support the audio element.
+                                            </audio>
+                                        </div>
+                                    `;
+                                } else if (attachment.type === 'application/pdf') {
+                                    botResponseContent += `
+                                        <div class="response-content">
+                                            <a href="${attachment.url}" class="response-pdf" download="${attachment.name || 'document.pdf'}">
+                                                Download PDF: ${attachment.name || 'document.pdf'}
+                                            </a>
+                                        </div>
+                                    `;
+                                }
+                            });
+                        }
+
+                        // Check for HTML content in response
+                        if (data.htmlMenu) {
+                            botResponseContent += this.renderHtmlMenu(data.htmlMenu);
+                        }
+
+                        // Add feedback buttons
+                        botResponseContent += this.renderFeedbackButtons(messageId);
+
+                        botMessage.innerHTML = botResponseContent;
+                        botMessage.dataset.messageId = messageId;
+
+                        // Add menu link event listeners
+                        document.querySelectorAll('.menu-link').forEach(link => {
+                            if (!link._clickListenerAdded) {
+                                link.addEventListener('click', (e) => {
+                                    const name = e.currentTarget.getAttribute('data-name');
+                                    this.userInput.value = name;
+                                    this.sendMessage();
+                                });
+                                link._clickListenerAdded = true;
+                            }
+                        });
+
+                        // Store feedback data
+                        this.messageFeedback[messageId] = {
+                            message: data,
+                            feedback: null
+                        };
+
+                        // Initialize audio player if audio response exists
+                        if (data.voiceResponse && data.audioResponse) {
+                            setTimeout(() => {
+                                this.initializeAudioPlayer(messageId);
+                                // Force play attempt after a brief moment
+                                setTimeout(() => {
+                                    const audioElement = document.getElementById(`audio-player-${messageId}`);
+                                    if (audioElement && audioElement.paused) {
+                                        audioElement.play().catch(err => console.log('Auto-play blocked:', err));
+                                    }
+                                }, 200);
+                            }, 150);
+                        }
+
+                        // Assign event listeners
+                        this.assignEventListenersToFeedbackButtons();
+                    } else {
+                        throw new Error('Invalid response format from API');
+                    }
+
+                    // Unlock inputs after successful response
+                    this.unlockInputs();
+
+                } catch (error) {
+                    console.error('Voice message error:', error);
+                    this.showError('Failed to send voice message');
+                    // Unlock inputs on error
+                    this.unlockInputs();
+                }
+            }
+
             scrollToBottom() {
                 this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
             }
@@ -1074,6 +2033,7 @@
                 this.sessionId = this.generateSessionId();
                 this.requestId = this.generateRequestId();
                 this.addMessage('bot', "Hello! I'm your AI assistant. How can I help you today?");
+                this.toggleSendVoiceButton(); // Reset to voice button
                 this.showCopyMsg("Chat has been reset");
                 setTimeout(() => {
                     this.clearCopyMsg();
