@@ -287,23 +287,54 @@
 
                 this.resetButton.addEventListener('click', () => this.resetChat());
 
-                // Voice recording handlers
-                this.voiceRecordButton.addEventListener('mousedown', () => this.startRecording());
-                this.voiceRecordButton.addEventListener('mouseup', () => this.stopRecording());
+                // Voice recording handlers - prevent duplicate events
+                let isMouseDown = false;
+                let isTouchActive = false;
+
+                // Mouse events (desktop)
+                this.voiceRecordButton.addEventListener('mousedown', (e) => {
+                    // Ignore if touch is active
+                    if (isTouchActive) return;
+                    isMouseDown = true;
+                    this.startRecording();
+                });
+
+                this.voiceRecordButton.addEventListener('mouseup', (e) => {
+                    if (!isMouseDown) return;
+                    isMouseDown = false;
+                    this.stopRecording();
+                });
+
                 this.voiceRecordButton.addEventListener('mouseleave', () => {
-                    if (this.isRecording) {
+                    if (isMouseDown && this.isRecording) {
+                        isMouseDown = false;
                         this.stopRecording();
                     }
                 });
 
-                // Touch support for mobile
+                // Touch events (mobile) - prevent mouse events from firing
                 this.voiceRecordButton.addEventListener('touchstart', (e) => {
                     e.preventDefault();
+                    e.stopPropagation();
+                    isTouchActive = true;
                     this.startRecording();
                 });
+
                 this.voiceRecordButton.addEventListener('touchend', (e) => {
                     e.preventDefault();
-                    this.stopRecording();
+                    e.stopPropagation();
+                    if (isTouchActive) {
+                        isTouchActive = false;
+                        this.stopRecording();
+                    }
+                });
+
+                this.voiceRecordButton.addEventListener('touchcancel', (e) => {
+                    e.preventDefault();
+                    if (isTouchActive && this.isRecording) {
+                        isTouchActive = false;
+                        this.stopRecording();
+                    }
                 });
             }
 
@@ -1641,9 +1672,9 @@
                         this.isRecording = false;
                     });
 
-                    // Start recording
-                    this.mediaRecorder.start();
-                    console.log('Recording started');
+                    // Start recording - request data every 100ms for better data collection
+                    this.mediaRecorder.start(100);
+                    console.log('Recording started with 100ms timeslice');
 
                     // Show recording indicator
                     this.voiceRecordingIndicator.style.display = 'block';
@@ -1690,6 +1721,33 @@
 
             stopRecording() {
                 if (this.isRecording && this.mediaRecorder) {
+                    // Check minimum recording duration (at least 500ms)
+                    const recordingDuration = Date.now() - this.recordingStartTime;
+                    console.log('Recording duration:', recordingDuration, 'ms');
+
+                    if (recordingDuration < 500) {
+                        console.warn('Recording too short, ignoring...');
+                        this.showError('Recording too short. Please hold the button longer.');
+
+                        // Stop the media recorder and clean up
+                        if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
+                            this.mediaRecorder.stop();
+                        }
+                        this.isRecording = false;
+
+                        // Hide recording indicator
+                        this.voiceRecordingIndicator.style.display = 'none';
+                        this.voiceRecordButton.classList.remove('recording');
+
+                        // Clear timer
+                        if (this.recordingTimerInterval) {
+                            clearInterval(this.recordingTimerInterval);
+                            this.recordingTimerInterval = null;
+                        }
+                        return;
+                    }
+
+                    console.log('Stopping recording...');
                     this.mediaRecorder.stop();
                     this.isRecording = false;
 
