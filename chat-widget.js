@@ -1649,19 +1649,13 @@
 
                     // Handle recording stop
                     this.mediaRecorder.addEventListener('stop', () => {
-                        console.log('Recording stopped. Total chunks:', this.audioChunks.length);
+                        console.log('Recording stopped event fired. Total chunks:', this.audioChunks.length);
 
                         if (this.audioChunks.length === 0) {
                             this.showError('No audio data recorded. Please try again.');
 
-                            // Stop all media stream tracks
-                            if (this.mediaStream) {
-                                this.mediaStream.getTracks().forEach(track => {
-                                    track.stop();
-                                    console.log('Track stopped:', track.kind);
-                                });
-                                this.mediaStream = null;
-                            }
+                            // Clean up stream reference (tracks already stopped in stopRecording)
+                            this.mediaStream = null;
                             return;
                         }
 
@@ -1669,18 +1663,10 @@
                         console.log('Audio blob created:', audioBlob.size, 'bytes');
                         this.recordedAudioBlob = audioBlob;
 
-                        // Stop all media stream tracks BEFORE sending
-                        if (this.mediaStream) {
-                            this.mediaStream.getTracks().forEach(track => {
-                                track.stop();
-                                console.log('Track stopped:', track.kind);
-                            });
-                            this.mediaStream = null;
-                            console.log('All audio tracks stopped');
-                        }
-
-                        // Clean up recorder
+                        // Clean up references (tracks were already stopped in stopRecording)
+                        this.mediaStream = null;
                         this.mediaRecorder = null;
+                        console.log('Recording resources cleaned up');
 
                         // Send the recorded audio
                         this.sendVoiceMessage(audioBlob);
@@ -1776,11 +1762,11 @@
                             this.mediaRecorder.stop();
                         }
 
-                        // Stop all media stream tracks
+                        // Stop all media stream tracks IMMEDIATELY
                         if (this.mediaStream) {
                             this.mediaStream.getTracks().forEach(track => {
                                 track.stop();
-                                console.log('Track stopped:', track.kind);
+                                console.log('Track stopped immediately (too short):', track.kind);
                             });
                             this.mediaStream = null;
                         }
@@ -1801,6 +1787,17 @@
                     }
 
                     console.log('Stopping recording...');
+
+                    // CRITICAL: Stop media stream tracks IMMEDIATELY, don't wait for async event
+                    if (this.mediaStream) {
+                        this.mediaStream.getTracks().forEach(track => {
+                            track.stop();
+                            console.log('Track stopped immediately:', track.kind);
+                        });
+                        console.log('All audio tracks stopped immediately');
+                    }
+
+                    // Now stop the MediaRecorder (this is async, but tracks are already stopped)
                     this.mediaRecorder.stop();
                     this.isRecording = false;
 
@@ -1814,8 +1811,8 @@
                         this.recordingTimerInterval = null;
                     }
 
-                    // Note: Media stream tracks will be stopped in the 'stop' event handler
-                    // after the audio blob is created
+                    // Note: MediaRecorder 'stop' event will fire and send the audio
+                    // but the microphone is already stopped
                 }
             }
 
