@@ -1551,23 +1551,79 @@
                     return;
                 }
 
-                try {
-                    // Request microphone permission
-                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                // Check if browser supports getUserMedia
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    this.showError('Your browser does not support microphone access. Please use a modern browser.');
+                    console.error('getUserMedia not supported');
+                    return;
+                }
 
-                    // Create media recorder
-                    this.mediaRecorder = new MediaRecorder(stream);
+                // Check if page is served over HTTPS (required for mic access)
+                if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+                    this.showError('Microphone access requires HTTPS connection');
+                    console.error('Not HTTPS:', window.location.protocol);
+                    return;
+                }
+
+                try {
+                    console.log('Requesting microphone permission...');
+
+                    // Request microphone permission with detailed options
+                    const stream = await navigator.mediaDevices.getUserMedia({
+                        audio: {
+                            echoCancellation: true,
+                            noiseSuppression: true,
+                            autoGainControl: true
+                        }
+                    });
+
+                    console.log('Microphone permission granted');
+                    console.log('Stream tracks:', stream.getTracks().length);
+
+                    // Check MediaRecorder support
+                    if (!window.MediaRecorder) {
+                        this.showError('Your browser does not support audio recording');
+                        stream.getTracks().forEach(track => track.stop());
+                        return;
+                    }
+
+                    // Determine best audio format
+                    let mimeType = 'audio/webm';
+                    if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
+                        mimeType = 'audio/webm;codecs=opus';
+                    } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
+                        mimeType = 'audio/mp4';
+                    } else if (MediaRecorder.isTypeSupported('audio/ogg;codecs=opus')) {
+                        mimeType = 'audio/ogg;codecs=opus';
+                    }
+
+                    console.log('Using MIME type:', mimeType);
+
+                    // Create media recorder with best format
+                    this.mediaRecorder = new MediaRecorder(stream, { mimeType: mimeType });
                     this.audioChunks = [];
                     this.isRecording = true;
 
                     // Handle data available
                     this.mediaRecorder.addEventListener('dataavailable', (event) => {
-                        this.audioChunks.push(event.data);
+                        if (event.data.size > 0) {
+                            this.audioChunks.push(event.data);
+                            console.log('Audio chunk received:', event.data.size, 'bytes');
+                        }
                     });
 
                     // Handle recording stop
                     this.mediaRecorder.addEventListener('stop', () => {
-                        const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
+                        console.log('Recording stopped. Total chunks:', this.audioChunks.length);
+
+                        if (this.audioChunks.length === 0) {
+                            this.showError('No audio data recorded. Please try again.');
+                            stream.getTracks().forEach(track => track.stop());
+                            return;
+                        }
+
+                        const audioBlob = new Blob(this.audioChunks, { type: mimeType });
+                        console.log('Audio blob created:', audioBlob.size, 'bytes');
                         this.recordedAudioBlob = audioBlob;
 
                         // Stop all tracks
@@ -1577,8 +1633,17 @@
                         this.sendVoiceMessage(audioBlob);
                     });
 
+                    // Handle errors during recording
+                    this.mediaRecorder.addEventListener('error', (event) => {
+                        console.error('MediaRecorder error:', event.error);
+                        this.showError('Recording error: ' + event.error.name);
+                        stream.getTracks().forEach(track => track.stop());
+                        this.isRecording = false;
+                    });
+
                     // Start recording
                     this.mediaRecorder.start();
+                    console.log('Recording started');
 
                     // Show recording indicator
                     this.voiceRecordingIndicator.style.display = 'block';
@@ -1592,8 +1657,34 @@
 
                 } catch (error) {
                     console.error('Error starting recording:', error);
-                    this.showError('Microphone access denied or not available');
+                    console.error('Error name:', error.name);
+                    console.error('Error message:', error.message);
+
+                    let errorMessage = 'Failed to access microphone. ';
+
+                    // Provide specific error messages based on error type
+                    if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+                        errorMessage = 'Microphone permission denied. Please allow microphone access in your browser settings.';
+                    } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
+                        errorMessage = 'No microphone found. Please connect a microphone and try again.';
+                    } else if (error.name === 'NotReadableError' || error.name === 'TrackStartError') {
+                        errorMessage = 'Microphone is already in use by another application. Please close other apps using the microphone.';
+                    } else if (error.name === 'OverconstrainedError') {
+                        errorMessage = 'Microphone does not meet the required constraints. Please try a different microphone.';
+                    } else if (error.name === 'SecurityError') {
+                        errorMessage = 'Microphone access blocked due to security restrictions. Ensure you are on HTTPS.';
+                    } else if (error.name === 'TypeError') {
+                        errorMessage = 'Browser does not support microphone access. Please use Chrome, Firefox, or Safari.';
+                    } else {
+                        errorMessage += error.message || 'Unknown error occurred.';
+                    }
+
+                    this.showError(errorMessage);
                     this.isRecording = false;
+
+                    // Hide recording indicator if shown
+                    this.voiceRecordingIndicator.style.display = 'none';
+                    this.voiceRecordButton.classList.remove('recording');
                 }
             }
 
@@ -1674,12 +1765,21 @@
                     formData.append('payload', JSON.stringify(payload));
 
                     // Add audio file with correct parameter name
+                    console.log('Audio blob size:', audioBlob.size, 'bytes');
+                    console.log('Audio blob type:', audioBlob.type);
                     formData.append('audio', audioBlob, 'voice-message.webm');
 
                     // Add dummy file for files parameter
                     const dummyContent = new Blob(["Voice message"], { type: "text/plain" });
                     const dummyFile = new File([dummyContent], "voice.txt", { type: "text/plain" });
                     formData.append('files', dummyFile);
+
+                    console.log('Sending voice message to:', this.chatApiEndpoint);
+                    console.log('FormData contents:', {
+                        payload: 'JSON payload',
+                        audio: audioBlob.size + ' bytes',
+                        files: 'dummy file'
+                    });
 
                     // Make API call
                     const response = await fetch(this.chatApiEndpoint, {
@@ -1690,7 +1790,12 @@
                         }
                     });
 
+                    console.log('Response status:', response.status);
+                    console.log('Response ok:', response.ok);
+
                     if (!response.ok) {
+                        const errorText = await response.text();
+                        console.error('API error response:', errorText);
                         throw new Error(`API request failed with status ${response.status}`);
                     }
 
