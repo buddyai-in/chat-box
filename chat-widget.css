@@ -825,6 +825,37 @@ button:focus, input:focus, textarea:focus, select:focus {
     opacity: 0.8;
 }
 
+/* Stop Recording Button */
+.stop-recording-button {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.3s ease;
+    margin-left: 10px;
+}
+
+.stop-recording-button:hover {
+    background: #c0392b;
+    transform: scale(1.05);
+}
+
+.stop-recording-button:active {
+    transform: scale(0.95);
+}
+
+.stop-recording-button svg {
+    width: 16px;
+    height: 16px;
+}
+
 /* Audio Player Styles */
 .audio-player-container {
     margin-top: 10px;

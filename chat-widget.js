@@ -128,6 +128,12 @@
                         <span class="recording-dot"></span>
                         <span class="recording-text">Recording...</span>
                         <span class="recording-timer" id="recordingTimer">0:00</span>
+                        <button class="stop-recording-button" id="stopRecordingButton" title="Stop recording">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <rect x="6" y="6" width="12" height="12" rx="2"/>
+                            </svg>
+                            Stop
+                        </button>
                     </div>
                 </div>
                 <div id="chatbotError" class="error-message"></div>
@@ -167,6 +173,7 @@
                 this.voiceRecordButton = document.getElementById('voiceRecordButton');
                 this.voiceRecordingIndicator = document.getElementById('voiceRecordingIndicator');
                 this.recordingTimer = document.getElementById('recordingTimer');
+                this.stopRecordingButton = document.getElementById('stopRecordingButton');
 
                 // State
                 this.isOpen = false;
@@ -333,6 +340,19 @@
                 this.voiceRecordButton.addEventListener('touchcancel', (e) => {
                     e.preventDefault();
                     if (isTouchActive && this.isRecording) {
+                        isTouchActive = false;
+                        this.stopRecording();
+                    }
+                });
+
+                // Stop recording button event listener
+                this.stopRecordingButton.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Stop recording button clicked');
+                    if (this.isRecording) {
+                        // Reset the touch and mouse states
+                        isMouseDown = false;
                         isTouchActive = false;
                         this.stopRecording();
                     }
