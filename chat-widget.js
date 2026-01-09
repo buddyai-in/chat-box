@@ -184,6 +184,7 @@
                 // Voice recording state
                 this.isRecording = false;
                 this.mediaRecorder = null;
+                this.mediaStream = null;
                 this.audioChunks = [];
                 this.recordedAudioBlob = null;
                 this.recordingStartTime = null;
@@ -1611,6 +1612,9 @@
                     console.log('Microphone permission granted');
                     console.log('Stream tracks:', stream.getTracks().length);
 
+                    // Store stream reference for cleanup
+                    this.mediaStream = stream;
+
                     // Check MediaRecorder support
                     if (!window.MediaRecorder) {
                         this.showError('Your browser does not support audio recording');
@@ -1649,7 +1653,15 @@
 
                         if (this.audioChunks.length === 0) {
                             this.showError('No audio data recorded. Please try again.');
-                            stream.getTracks().forEach(track => track.stop());
+
+                            // Stop all media stream tracks
+                            if (this.mediaStream) {
+                                this.mediaStream.getTracks().forEach(track => {
+                                    track.stop();
+                                    console.log('Track stopped:', track.kind);
+                                });
+                                this.mediaStream = null;
+                            }
                             return;
                         }
 
@@ -1657,8 +1669,18 @@
                         console.log('Audio blob created:', audioBlob.size, 'bytes');
                         this.recordedAudioBlob = audioBlob;
 
-                        // Stop all tracks
-                        stream.getTracks().forEach(track => track.stop());
+                        // Stop all media stream tracks BEFORE sending
+                        if (this.mediaStream) {
+                            this.mediaStream.getTracks().forEach(track => {
+                                track.stop();
+                                console.log('Track stopped:', track.kind);
+                            });
+                            this.mediaStream = null;
+                            console.log('All audio tracks stopped');
+                        }
+
+                        // Clean up recorder
+                        this.mediaRecorder = null;
 
                         // Send the recorded audio
                         this.sendVoiceMessage(audioBlob);
@@ -1668,8 +1690,18 @@
                     this.mediaRecorder.addEventListener('error', (event) => {
                         console.error('MediaRecorder error:', event.error);
                         this.showError('Recording error: ' + event.error.name);
-                        stream.getTracks().forEach(track => track.stop());
+
+                        // Stop all media stream tracks
+                        if (this.mediaStream) {
+                            this.mediaStream.getTracks().forEach(track => {
+                                track.stop();
+                                console.log('Track stopped:', track.kind);
+                            });
+                            this.mediaStream = null;
+                        }
+
                         this.isRecording = false;
+                        this.mediaRecorder = null;
                     });
 
                     // Start recording - request data every 100ms for better data collection
@@ -1690,6 +1722,15 @@
                     console.error('Error starting recording:', error);
                     console.error('Error name:', error.name);
                     console.error('Error message:', error.message);
+
+                    // Stop any media stream that might have been created
+                    if (this.mediaStream) {
+                        this.mediaStream.getTracks().forEach(track => {
+                            track.stop();
+                            console.log('Track stopped on error:', track.kind);
+                        });
+                        this.mediaStream = null;
+                    }
 
                     let errorMessage = 'Failed to access microphone. ';
 
@@ -1712,6 +1753,7 @@
 
                     this.showError(errorMessage);
                     this.isRecording = false;
+                    this.mediaRecorder = null;
 
                     // Hide recording indicator if shown
                     this.voiceRecordingIndicator.style.display = 'none';
@@ -1733,7 +1775,18 @@
                         if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
                             this.mediaRecorder.stop();
                         }
+
+                        // Stop all media stream tracks
+                        if (this.mediaStream) {
+                            this.mediaStream.getTracks().forEach(track => {
+                                track.stop();
+                                console.log('Track stopped:', track.kind);
+                            });
+                            this.mediaStream = null;
+                        }
+
                         this.isRecording = false;
+                        this.mediaRecorder = null;
 
                         // Hide recording indicator
                         this.voiceRecordingIndicator.style.display = 'none';
@@ -1760,6 +1813,9 @@
                         clearInterval(this.recordingTimerInterval);
                         this.recordingTimerInterval = null;
                     }
+
+                    // Note: Media stream tracks will be stopped in the 'stop' event handler
+                    // after the audio blob is created
                 }
             }
 
