@@ -75,7 +75,7 @@
                 <div class="chatbot-controls-row">
                     <div class="file-upload-wrapper">
                         <button class="file-upload-label" role="button" aria-label="Upload file" tabindex="0" id="fileMenuButton">
-                            <img src="icons8-file-upload-51.png" width="25px" />
+                            <img src="icons8-file-upload-51.png" width="25px" alt="Upload file" />
                             <input type="file" id="chatbotFileUpload" class="file-upload-input" aria-hidden="true" accept="image/*,video/*,audio/*,.pdf,.html" multiple>
                         </button>
                         
@@ -99,12 +99,29 @@
                         <option value="DEEPSEEK">DeepSeek</option> 
                     </select>
                     
+                    <!-- Voice Input Button -->
+                    <button class="voice-input-button" id="voiceInputButton" aria-label="Voice input">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M19 10v2a7 7 0 01-14 0v-2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M12 19v3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M8 23h8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                    
                     <button class="send-button" id="chatbotSendButton" aria-label="Send message" disabled>
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-top: 2px;margin-right: 6px;">
                             <path d="M22 2L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                             <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                     </button>
+                </div>
+                <div id="dbConnectionWrapper" class="db-connection-wrapper hidden">
+                    <label for="dbConnectionSelector" class="db-connection-label">Database connection</label>
+                    <select id="dbConnectionSelector" class="db-connection-selector" aria-label="Select database connection" disabled>
+                        <option value="">Select database connection</option>
+                    </select>
+                    <div id="dbConnectionStatus" class="db-connection-status"></div>
                 </div>
                 <div id="chatbotError" class="error-message"></div>
                 <div id="chatbotCopyMsg" class="chatbot-copy-msg"></div>
@@ -136,14 +153,46 @@
                 this.themeToggle = document.querySelector('.theme-toggle');
                 this.apiToggle = document.querySelector('.api-toggle');
                 this.closeButton = document.querySelector('.close-chatbot');
+                this.dbConnectionWrapper = document.getElementById('dbConnectionWrapper');
+                this.dbConnectionSelector = document.getElementById('dbConnectionSelector');
+                this.dbConnectionStatus = document.getElementById('dbConnectionStatus');
                 this.errorDisplay = document.getElementById('chatbotError');
                 this.chatbotCopyMsg = document.getElementById('chatbotCopyMsg');
                 this.resetButton = document.querySelector('.reset-chat');
+                this.voiceInputButton = document.getElementById('voiceInputButton');
 
                 // State
                 this.isOpen = false;
                 this.currentTheme = localStorage.getItem('chatbot-theme') || 'dark';
-                this.apiMode = true;
+                this.chatModes = ['API', 'DOCUMENT', 'DB'];
+                this.currentChatMode = localStorage.getItem('chatbot-mode') || 'API';
+                this.modeIcons = {
+                    API: `
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <path d="M8 9L5 12L8 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M16 9L19 12L16 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M13 7L11 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    `,
+                    DOCUMENT: `
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <path d="M14 2H7C5.89543 2 5 2.89543 5 4V20C5 21.1046 5.89543 22 7 22H17C18.1046 22 19 21.1046 19 20V7L14 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M14 2V7H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M9 13H15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            <path d="M9 17H13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    `,
+                    DB: `
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <ellipse cx="12" cy="5" rx="7" ry="3" stroke="currentColor" stroke-width="2"/>
+                            <path d="M5 5V12C5 13.6569 8.13401 15 12 15C15.866 15 19 13.6569 19 12V5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M5 12V19C5 20.6569 8.13401 22 12 22C15.866 22 19 20.6569 19 19V12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    `
+                };
+                if (!this.chatModes.includes(this.currentChatMode)) {
+                    this.currentChatMode = 'API';
+                }
                 this.sessionId = this.generateSessionId();
                 this.requestId = this.generateRequestId();
                 this.companyName = this.getCompanyName();
@@ -152,14 +201,21 @@
                 this.uploadedFiles = [];
                 this.messageFeedback = {};
                 this.selectedDocumentFiles = [];
+                this.dbConnections = [];
+                this.dbConnectionsLoaded = false;
+                this.isDbConnectionsLoading = false;
+
+                // Voice feature state
+                this.isRecording = false;
+                this.speechRecognition = null;
+                this.speechSynthesis = window.speechSynthesis;
+                this.currentSpeech = null;
 
                 this.sId = localStorage.getItem('sid');
                 this.sdocumentIdId = localStorage.getItem('documentId');
                 // Configuration
-                let env = localStorage.getItem('profile');
-                
-            this.chatApiEndpoint = 'https://'+env+'.api.chat.buddyai.in/v2/api/'+this.sId+'/chat/';
-            this.docApiEndpoint = 'https://'+ env+'.api.chat.buddyai.in/v2/api/document/'+this.sId+'/chat/';
+                this.apiBaseUrl = this.resolveApiBaseUrl();
+                this.refreshApiEndpoints();
                 this.supportedFileTypes = {
                     pdf: ['application/pdf']
                 };
@@ -167,7 +223,7 @@
                 // Initialize state
 
                 const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-                if(true) {
+                if (isLoggedIn) {
                     // Initialize
                     this.init();
                 }
@@ -178,20 +234,23 @@
                 // Set initial theme
                 this.setTheme(this.currentTheme);
                 this.sId = localStorage.getItem('sid');
+                this.apiBaseUrl = this.resolveApiBaseUrl();
+                this.refreshApiEndpoints();
 
                 // Event listeners
                 this.toggleButton.addEventListener('click', () => this.toggleChatbot());
                 this.closeButton.addEventListener('click', () => this.closeChatbot());
                 this.themeToggle.addEventListener('click', () => this.toggleTheme());
                 this.apiToggle.addEventListener('click', () => this.toggleApiMode());
+                this.updateModeUI();
 
                 this.userInput.addEventListener('input', () => {
-                    this.sendButton.disabled = this.userInput.value.trim() === '' && this.uploadedFiles.length === 0 && this.defaultPrompt.value.trim() === '';
+                    this.updateSendButtonState();
                     this.clearError();
                 });
 
                 this.defaultPrompt.addEventListener('input', () => {
-                    this.sendButton.disabled = this.userInput.value.trim() === '' && this.uploadedFiles.length === 0 && this.defaultPrompt.value.trim() === '';
+                    this.updateSendButtonState();
                     this.clearError();
                 });
 
@@ -233,6 +292,26 @@
                     }
                 });
 
+                if (this.dbConnectionSelector) {
+                    this.dbConnectionSelector.addEventListener('change', () => {
+                        const selectedId = this.dbConnectionSelector.value;
+                        if (selectedId) {
+                            localStorage.setItem('dbConnectionId', selectedId);
+                            const selectedConnection = this.dbConnections.find(connection => String(connection.id) === selectedId);
+                            if (selectedConnection) {
+                                this.setDbConnectionStatus(`Using ${selectedConnection.name || ('Connection ' + selectedConnection.id)} (${selectedConnection.dbType || 'DB'})`);
+                            } else {
+                                this.setDbConnectionStatus('Database connection selected.');
+                            }
+                        } else {
+                            localStorage.removeItem('dbConnectionId');
+                            this.setDbConnectionStatus('Please select a database connection.', true);
+                        }
+                        this.clearError();
+                        this.updateSendButtonState();
+                    });
+                }
+
                 // Initial welcome message
                 setTimeout(() => {
                     this.addMessage('bot', "Hello! I'm your AI assistant. How can I help you today?");
@@ -245,6 +324,10 @@
                 });
 
                 this.resetButton.addEventListener('click', () => this.resetChat());
+
+                // Voice input button handler
+                this.voiceInputButton.addEventListener('click', () => this.toggleVoiceInput());
+                this.updateSendButtonState();
             }
 
             generateSessionId() {
@@ -294,6 +377,81 @@
                 return localStorage.getItem('userId');
             }
 
+            normalizeApiBaseUrl(rawValue) {
+                if (!rawValue) return null;
+
+                let baseUrl = String(rawValue).trim();
+                if (!baseUrl) return null;
+
+                baseUrl = baseUrl.replace(/\/+$/, '');
+
+                if (/^https?:\/\//i.test(baseUrl)) {
+                    if (baseUrl.includes('/v2/api')) {
+                        return baseUrl.replace(/\/+$/, '');
+                    }
+
+                    if (baseUrl.endsWith('/v2')) {
+                        return `${baseUrl}/api`;
+                    }
+
+                    return `${baseUrl}/v2/api`;
+                }
+
+                const looksLikeHost = /^(localhost|\d{1,3}(?:\.\d{1,3}){3}|[^\s\/]+\.[^\s\/]+)(?::\d+)?(?:\/.*)?$/i.test(baseUrl);
+                if (looksLikeHost) {
+                    baseUrl = `https://${baseUrl.replace(/^\/+/, '')}`;
+                    if (baseUrl.includes('/v2/api')) {
+                        return baseUrl.replace(/\/+$/, '');
+                    }
+
+                    if (baseUrl.endsWith('/v2')) {
+                        return `${baseUrl}/api`;
+                    }
+
+                    return `${baseUrl}/v2/api`;
+                }
+
+                return `https://${baseUrl}.api.chat.buddyai.in/v2/api`;
+            }
+
+            resolveApiBaseUrl() {
+                const candidates = [
+                    localStorage.getItem('dbApiBaseUrl'),
+                    localStorage.getItem('apiBaseUrl'),
+                    localStorage.getItem('profile'),
+                    window.BUDDYAI_DB_API_BASE_URL,
+                    window.BUDDYAI_API_BASE_URL,
+                ];
+
+                for (const candidate of candidates) {
+                    const normalizedUrl = this.normalizeApiBaseUrl(candidate);
+                    if (normalizedUrl) {
+                        return normalizedUrl;
+                    }
+                }
+
+                if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
+                    return `${window.location.origin}/v2/api`;
+                }
+
+                return null;
+            }
+
+            refreshApiEndpoints() {
+                if (!this.apiBaseUrl || !this.sId) {
+                    this.chatApiEndpoint = null;
+                    this.docApiEndpoint = null;
+                    this.dbChatApiEndpoint = null;
+                    this.dbConnectionsEndpoint = null;
+                    return;
+                }
+
+                this.chatApiEndpoint = `${this.apiBaseUrl}/${this.sId}/chat/`;
+                this.docApiEndpoint = `${this.apiBaseUrl}/document/${this.sId}/chat/`;
+                this.dbChatApiEndpoint = `${this.apiBaseUrl}/database/${this.sId}/chat/`;
+                this.dbConnectionsEndpoint = `${this.apiBaseUrl}/database/${this.sId}/connections`;
+            }
+
             toggleChatbot() {
                 this.isOpen = !this.isOpen;
                 if (this.isOpen) {
@@ -314,6 +472,9 @@
                 this.messagesContainer.innerHTML = '';
                 this.uploadedFiles = [];
                 this.messageFeedback = {};
+                this.fileUpload.value = '';
+                document.getElementById('chatbotFileList').innerHTML = '';
+                this.updateSendButtonState();
             }
 
             closeChatbot() {
@@ -338,15 +499,185 @@
             }
 
             toggleApiMode() {
-                this.apiMode = !this.apiMode;
-                this.apiToggle.style.backgroundColor = this.apiMode ? 'var(--accent-color)' : '';
-                this.apiToggle.style.color = this.apiMode ? 'white' : '';
-                this.addMessage('bot', this.apiMode ?
-                    'Switched to API mode.' :
-                    'Switched to Document mode.');
-                
+                const currentIndex = this.chatModes.indexOf(this.currentChatMode);
+                const nextIndex = (currentIndex + 1) % this.chatModes.length;
+                this.currentChatMode = this.chatModes[nextIndex];
+                localStorage.setItem('chatbot-mode', this.currentChatMode);
+                this.updateModeUI();
+                this.addMessage('bot', `Switched to ${this.currentChatMode} mode.`);
+            }
+
+            updateModeUI() {
+                if (!this.apiToggle) return;
+
+                const modeLabel = this.currentChatMode;
+                const isDbMode = modeLabel === 'DB';
+                this.apiToggle.innerHTML = this.modeIcons[modeLabel] || this.modeIcons.API;
+                this.apiToggle.dataset.mode = modeLabel.toLowerCase();
+                this.apiToggle.style.backgroundColor = 'var(--accent-color)';
+                this.apiToggle.style.color = 'white';
+                this.apiToggle.title = `Current mode: ${modeLabel}. Click to switch.`;
+                this.apiToggle.setAttribute('aria-label', `Chat mode ${modeLabel}. Click to switch mode`);
+
                 if (this.fileMenuButton) {
-                    this.fileMenuButton.style.display = this.apiMode ? 'flex' : 'none';
+                    this.fileMenuButton.style.display = this.currentChatMode === 'API' ? 'flex' : 'none';
+                }
+
+                if (this.fileMenu) {
+                    this.fileMenu.classList.remove('show');
+                }
+
+                if (this.dbConnectionWrapper) {
+                    this.dbConnectionWrapper.classList.toggle('hidden', !isDbMode);
+                }
+
+                if (isDbMode) {
+                    this.fetchDbConnections();
+                }
+
+                this.updateSendButtonState();
+            }
+
+            updateSendButtonState() {
+                if (!this.sendButton) return;
+
+                const hasContent = this.userInput.value.trim() !== '' || this.uploadedFiles.length > 0 || this.defaultPrompt.value.trim() !== '';
+                const hasDbConnection = this.currentChatMode !== 'DB' || !!this.getSelectedDbConnectionId();
+                const dbReady = this.currentChatMode !== 'DB' || (!this.isDbConnectionsLoading && hasDbConnection);
+
+                this.sendButton.disabled = !hasContent || !dbReady;
+            }
+
+            getSelectedDbConnectionId() {
+                if (!this.dbConnectionSelector || !this.dbConnectionSelector.value) {
+                    return null;
+                }
+
+                return Number(this.dbConnectionSelector.value);
+            }
+
+            setDbConnectionStatus(message, isError = false) {
+                if (!this.dbConnectionStatus) return;
+
+                this.dbConnectionStatus.textContent = message || '';
+                this.dbConnectionStatus.classList.toggle('error', isError);
+            }
+
+            populateDbConnectionSelect() {
+                if (!this.dbConnectionSelector) return;
+
+                const availableConnections = this.dbConnections.filter(connection => connection && connection.active !== false);
+                const storedConnectionId = localStorage.getItem('dbConnectionId');
+                const selectedConnection = availableConnections.find(connection => String(connection.id) === String(storedConnectionId)) || availableConnections[0] || null;
+
+                this.dbConnectionSelector.innerHTML = '<option value="">Select database connection</option>';
+
+                availableConnections.forEach(connection => {
+                    const option = document.createElement('option');
+                    option.value = String(connection.id);
+                    option.textContent = `${connection.name || ('Connection ' + connection.id)}${connection.dbType ? ' (' + connection.dbType + ')' : ''}`;
+                    this.dbConnectionSelector.appendChild(option);
+                });
+
+                if (selectedConnection) {
+                    this.dbConnectionSelector.value = String(selectedConnection.id);
+                    localStorage.setItem('dbConnectionId', String(selectedConnection.id));
+                    this.setDbConnectionStatus(`Using ${selectedConnection.name || ('Connection ' + selectedConnection.id)} (${selectedConnection.dbType || 'DB'})`);
+                } else {
+                    this.dbConnectionSelector.value = '';
+                    localStorage.removeItem('dbConnectionId');
+                    this.setDbConnectionStatus('No active database connections found.', true);
+                }
+
+                this.dbConnectionSelector.disabled = availableConnections.length === 0;
+                this.updateSendButtonState();
+            }
+
+            async fetchDbConnections(forceRefresh = false) {
+                if (!this.dbConnectionSelector || this.isDbConnectionsLoading) return;
+
+                this.sId = localStorage.getItem('sid');
+                this.apiBaseUrl = this.resolveApiBaseUrl();
+                this.refreshApiEndpoints();
+
+                if (this.dbConnectionsLoaded && !forceRefresh) {
+                    this.populateDbConnectionSelect();
+                    return;
+                }
+
+                if (!this.sId) {
+                    this.dbConnectionSelector.disabled = true;
+                    this.dbConnectionSelector.innerHTML = '<option value="">Missing session id</option>';
+                    this.setDbConnectionStatus('Missing sid. Please set the session/database id first.', true);
+                    this.updateSendButtonState();
+                    return;
+                }
+
+                if (!this.getsSecretKey()) {
+                    this.dbConnectionSelector.disabled = true;
+                    this.dbConnectionSelector.innerHTML = '<option value="">Missing auth token</option>';
+                    this.setDbConnectionStatus('Missing Bearer token. Please set bai-sk first.', true);
+                    this.updateSendButtonState();
+                    return;
+                }
+
+                if (!this.dbConnectionsEndpoint) {
+                    this.dbConnectionSelector.disabled = true;
+                    this.dbConnectionSelector.innerHTML = '<option value="">Missing API base URL</option>';
+                    this.setDbConnectionStatus('Database API URL is not configured. Set localStorage apiBaseUrl/dbApiBaseUrl or profile.', true);
+                    this.updateSendButtonState();
+                    return;
+                }
+
+                this.isDbConnectionsLoading = true;
+                this.dbConnectionSelector.disabled = true;
+                this.dbConnectionSelector.innerHTML = '<option value="">Loading database connections...</option>';
+                this.setDbConnectionStatus('Loading database connections...');
+                this.updateSendButtonState();
+
+                try {
+                    const response = await fetch(this.dbConnectionsEndpoint, {
+                        method: 'GET',
+                        headers: {
+                            Accept: 'application/json',
+                            Authorization: 'Bearer ' + this.getsSecretKey(),
+                        }
+                    });
+
+                    const contentType = response.headers.get('content-type') || '';
+                    let data;
+
+                    if (contentType.includes('application/json')) {
+                        data = await response.json();
+                    } else {
+                        const rawText = await response.text();
+                        try {
+                            data = JSON.parse(rawText);
+                        } catch (parseError) {
+                            const looksLikeHtml = rawText.trim().startsWith('<');
+                            throw new Error(looksLikeHtml
+                                ? 'Received HTML instead of JSON while loading database connections.'
+                                : 'Received non-JSON response while loading database connections.');
+                        }
+                    }
+
+                    if (!response.ok) {
+                        throw new Error((data && data.message) || `Failed to load database connections (${response.status})`);
+                    }
+
+                    this.dbConnections = Array.isArray(data) ? data : [];
+                    this.dbConnectionsLoaded = true;
+                    this.populateDbConnectionSelect();
+                } catch (error) {
+                    console.error('DB Connections Error:', error);
+                    this.dbConnections = [];
+                    this.dbConnectionsLoaded = false;
+                    this.dbConnectionSelector.disabled = true;
+                    this.dbConnectionSelector.innerHTML = '<option value="">Unable to load connections</option>';
+                    this.setDbConnectionStatus(error.message || 'Unable to load database connections.', true);
+                } finally {
+                    this.isDbConnectionsLoading = false;
+                    this.updateSendButtonState();
                 }
             }
 
@@ -386,13 +717,13 @@
             fileChip.querySelector('button').addEventListener('click', () => {
                 this.uploadedFiles = this.uploadedFiles.filter(f => f.name !== file.name);
                 fileChip.remove();
-                this.sendButton.disabled = this.userInput.value.trim() === '' && this.uploadedFiles.length === 0 && this.defaultPrompt.value.trim() === '';
+                    this.updateSendButtonState();
             });
 
             document.getElementById('chatbotFileList').appendChild(fileChip);
         });
 
-        this.sendButton.disabled = this.userInput.value.trim() === '' && this.uploadedFiles.length === 0 && this.defaultPrompt.value.trim() === '';
+        this.updateSendButtonState();
 
 
             }
@@ -441,9 +772,33 @@
 
                 if (userText === '' && this.uploadedFiles.length === 0 && df === '') return;
 
-                console.log('apiMode:', this.apiMode);
+                const isApiMode = this.currentChatMode === 'API';
+                const isDocumentMode = this.currentChatMode === 'DOCUMENT';
+                const isDbMode = this.currentChatMode === 'DB';
+                const selectedDbConnectionId = this.getSelectedDbConnectionId();
 
-                // Add user message to chat
+                this.sId = localStorage.getItem('sid');
+                this.apiBaseUrl = this.resolveApiBaseUrl();
+                this.refreshApiEndpoints();
+
+                if (isDbMode && this.isDbConnectionsLoading) {
+                    this.showError('Please wait while database connections are loading.');
+                    return;
+                }
+
+                if (!this.apiBaseUrl || !this.sId) {
+                    this.showError('Chat API configuration is missing. Please set sid and apiBaseUrl/profile.');
+                    return;
+                }
+
+                if (isDbMode && !selectedDbConnectionId) {
+                    this.showError('Please select a database connection first.');
+                    if (this.dbConnectionSelector) {
+                        this.dbConnectionSelector.focus();
+                    }
+                    return;
+                }
+
                 if (userText) {
                     this.addMessage('user', userText);
                 }
@@ -456,23 +811,11 @@
                 this.userInput.style.height = '40px';
                 this.sendButton.disabled = true;
 
-                // Add loading indicator for bot response
                 const botMessage = this.addMessage('bot', '');
 
                 try {
-                    // Prepare the request
-                    const formData = new FormData();
                     const payload = {
-                        messages: [
-                            {
-                                role: "user",
-                                content: userText,
-                            },
-                            {
-                                role: "system",
-                                content: df,
-                            }
-                        ],
+                        messages: [{ role: 'user', content: userText }],
                         tools: [],
                         context: {
                             userId: this.getUserId(),
@@ -483,390 +826,285 @@
                             roleId: this.getRoleId(),
                         },
                         provider: this.modelSelector.value,
+                        chatOption: {
+                            voiceMode: false,
+                            voiceId: 'alloy',
+                            inputLanguage: 'en',
+                            outputLanguage: 'en',
+                            chatMode: this.currentChatMode
+                        },
                         properties: {
-                            "GPS_LOCATION":this.getGPSLocation(),
-                            "GPS_COORDINATE": this.getGPSCoordinates(),
-                            "CLIENT_IP":"",
-                            "USER_AGENT": navigator.userAgent,
-                            "DEVICE_TYPE": navigator.userAgent,
-                            "OS_TYPE": navigator.platform,
-                            "REFERRER_URL": window.location.href,
-                            "PAGE_URL": window.location.href,
-                            "CHANNEL":"WEBCHAT",
-                            "LOCATION":navigator.geolocation
+                            GPS_LOCATION: this.getGPSLocation(),
+                            GPS_COORDINATE: this.getGPSCoordinates(),
+                            CLIENT_IP: '',
+                            USER_AGENT: navigator.userAgent,
+                            DEVICE_TYPE: navigator.userAgent,
+                            OS_TYPE: navigator.platform,
+                            REFERRER_URL: window.location.href,
+                            PAGE_URL: window.location.href,
+                            CHANNEL: 'WEBCHAT',
+                            LOCATION: navigator.geolocation
                         }
                     };
-
-                    if (!this.apiMode) {
-                        const obj = {
-                            documentId: localStorage.getItem('documentId'),
-                            type : "MULTI_FILE",
-                            clientId : "2000003"
-                        }
-                        payload.properties = obj
-                    }
 
                     if (df !== '') {
-                        payload.messages.push({
-                            role: "system",
-                            content: df,
-                        });
-                    };
-                    
-                    // Add JSON payload to FormData
-                    formData.append('payload', JSON.stringify(payload));
-
-
-                    if (this.apiMode) {
-                        if (this.uploadedFiles.length === 0) {
-                            const dummyContent = new Blob(["Hello, this is dummy file content"], { type: "text/plain" });
-                            const dummyFile = new File([dummyContent], "dummy.txt", { type: "text/plain" });
-                            formData.append('files',dummyFile);
-                        } else {
-                            // Add all uploaded files
-                            this.uploadedFiles.forEach(file => {
-                              formData.append('files', file);
-                            });
-                        }
-                    } 
-
-                let url = this.chatApiEndpoint;
-                if (!this.apiMode) {
-                    url = this.docApiEndpoint;
-                    // Add sessionId to payload for document mode
-                    payload.context.sessionId = this.sessionId;
-                }
-
-                
-
-                // if (defaultPrompt !== '') {
-                //     userText = defaultPrompt;
-                // }
-
-                // Make API call
-                    const response = await fetch(url, {
-                        method: 'POST',
-                        body: formData,
-                        headers: {
-                            "Authorization": "Bearer " + this.getsSecretKey(),
-                        }
-                    });
-
-                    if (!response.ok) {
-                        throw new Error(`API request failed with status ${response.status}`);
+                        payload.messages.push({ role: 'system', content: df });
                     }
 
-                   const data = await response.json();
-
-//                const data1 = `{
-//   "text": "https://buddyai-dev-temp.s3.ap-south-1.amazonaws.com/4_ae8f2-a9ef-99f7-4807_monthly_payslip.pdf",
-//   "menu": null,
-//   "form": null,
-//   "link": "https://buddyai-dev-temp.s3.ap-south-1.amazonaws.com/4_ae8f2-a9ef-99f7-4807_monthly_payslip.pdf",
-//   "type": "DOWNLOADABLE",
-//   "downloadablePath": null,
-//   "complex": null,
-//   "uuId": "d0072b79-0969-4325-bed0-7179b3322022",
-//   "requestId": "ae8f2-a9ef-99f7-4807",
-//   "stateType": null
-// }`;
-
-                    
-                    // const data = JSON.parse(documentData1); // Simulating API response for testing   
-                    // console.log('API Response:', data1);
-                    // const data = JSON.parse(data1);
-                    console.log('API Response:', data);
-
-                    // const data = JSON.parse(documentData1); // Simulating API response for testing
-                    console.log('API Response:', data);
-                    // Process the response
-                    if (data) {
-                        const messageId = data.uuId;
-                        let botResponseContent = '';
-
-                        // Handle different response types
-                        if (data.type === "TEXT" && data.text && this.apiMode == true) {
-                            // Text response
-                            botResponseContent = this.renderMarkdown(data.text);
-                        } else if (data.type === "MENU") {
-                            botResponseContent = this.renderHtmlMenu(data.menu);
-                        } else if (data.choices && data.choices.length > 0 && data.choices[0].message) {
-                            // OpenAI-style response
-                            botResponseContent = this.renderMarkdown(data.choices[0].message.content);
-                        } else if (data.type === "COMPLEX" && data.complex) {
-                            
-                            console.log('in complex');
-
-                            // IMAGES
-                            if (data.complex.metaData.type === "IMAGE"
-                                && data.complex.data && data.complex.data.length > 0) {
-                                botResponseContent = '<div class="response-images">';
-                                data.complex.data.forEach(image => {
-                                    botResponseContent += `
-                                        <div class="response-media" style="margin-bottom: 20px;">
-                                            <img src="${image.link}" alt="${image.photographer || 'Image'}" 
-                                                style="display: block; max-width: 100%; height: auto; border-radius: 8px;">
-                                            
-                                            <div style="margin-top: 5px; text-align: left;display: flex;align-items:center;gap: 7px"">
-                                                <p style="margin: 0;">${image.photographer || ''}</p>
-                                                <a href="javascript:void(0)" onclick="window.chatbot.forceDownloadImage('${image.link}', '${image.link.split('/').pop()}')"
-                                                title="Download image"
-                                                style="
-                                                        display: inline-flex; 
-                                                        justify-content: center; 
-                                                        align-items: center; 
-                                                        margin-top: 6px; 
-                                                        padding: 3px; 
-                                                        border: 1px solid black; 
-                                                        border-radius: 6px; 
-                                                        cursor: pointer; 
-                                                        transition: all 0.3s ease;
-                                                        box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-                                                ">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" viewBox="0 0 24 24" fill="black" style="transform: rotate(180deg);">
-                                                        <path d="M5 20h14v-2H5v2zm7-18L5.33 9h4.34v6h4.66V9h4.34L12 2z"/>
-                                                    </svg>
-                                                </a>
-                                            </div>
-                                        </div>
-                                    `;
-                                });
-                                botResponseContent += '</div>';
-                            }
-
-
-                            // VIDEOS
-                            if (data.complex.metaData.type === "VIDEO"
-                                && data.complex.data && data.complex.data.length > 0) {
-                                botResponseContent = '<div class="response-videos">';
-                                data.complex.data.forEach((video, index) => {
-                                    botResponseContent += `
-                                        <div class="response-media" style="margin-bottom: 20px;">
-                                            <video controls style="display: block; max-width: 100%; height: auto; border-radius: 8px;">
-                                                <source src="${video.link}" type="video/mp4">
-                                                Your browser does not support the video tag.
-                                            </video>
-
-                                            <div style="margin-top: 5px; text-align: left;display: flex;align-items:center;gap: 7px">
-                                                <p style="margin: 0;">${video.link.split('/').pop() || ''}</p>
-                                                <a href="javascript:void(0)" onclick="window.chatbot.forceDownloadImage('${video.link}', '${video.link.split('/').pop()}')"
-                                                title="Download video"
-                                                style="
-                                                        display: inline-flex; 
-                                                        justify-content: center; 
-                                                        align-items: center; 
-                                                        margin-top: 6px; 
-                                                        padding: 2px; 
-                                                        border: 1px solid black; 
-                                                        border-radius: 6px; 
-                                                        cursor: pointer;    
-                                                        transition: all 0.3s ease;
-                                                        box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-                                                ">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" viewBox="0 0 24 24" fill="black" style="transform: rotate(180deg);">
-                                                        <path d="M5 20h14v-2H5v2zm7-18L5.33 9h4.34v6h4.66V9h4.34L12 2z"/>
-                                                    </svg>
-                                                </a>
-                                            </div>
-                                        </div>
-                                    `;
-                                });
-                                botResponseContent += '</div>';  
-                            }
-
-
-                            // DOCUMENT
-                            if (data.complex.metaData.type === "TEXT") { 
-                                    const responseText = this.renderMarkdown(data.complex.data.response);
-                                    let referenceText = '';
-
-                                    if (data.complex.data.documents && data.complex.data.documents.length > 0) {
-                                        referenceText += `<div style="margin-top: 10px; font-size: 13px; color: gray;">Source(s):<br>`;
-                                        data.complex.data.documents.forEach((doc, index) => {
-                                            const pages = doc.pages.join(', ');
-                                            referenceText += `&bull; <strong>${doc.fileName}</strong> (Pages: ${pages})<br>`;
-                                        });
-                                        referenceText += `</div>`;
-                                    }
-
-                                    botResponseContent = responseText + referenceText;
-                            }
-
-                            if (data.complex.metaData.type === "LIST") {
-                                console.log('in complex');
-                                console.log(JSON.stringify(data.complex.metaData) );
-                                botResponseContent = this.renderHtmlMenuFromList(data.complex.data,
-                                    data.complex.metaData.message);
-                            }
-
-                            // "DOCUMENT_UPLOAD_LIST"
-
-                            if (data.complex.metaData.type === "DOCUMENT_UPLOAD_LIST") { 
-                                console.log('in "DOCUMENT_UPLOAD_LIST"');
-                                const responseText = this.renderMarkdown(data.text);
-                              let referenceText = `
-                                    <div style="margin-top: 10px; font-size: 13px; color: gray;">
-                                        <strong>Uploaded Documents:</strong><br>
-                                        <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
-                                `;
-
-                                if (data.complex.data && data.complex.data.length > 0) {
-                                    data.complex.data.forEach(doc => {
-                                        const fileId = this.generateMessageId(); // unique ID
-                                        const fileName = doc.fileName;
-                                        const fileUrl = doc.fileUrl;
-
-                                        referenceText += `
-                                            <label for="${fileId}" style="
-                                                display: flex;
-                                                align-items: center;
-                                                background: var(--input-bg);
-                                                color: var(--input-text);
-                                                padding: 6px 10px;
-                                                border-radius: 18px;
-                                                font-size: 13px;
-                                                border: 1px solid var(--border-color);
-                                                gap: 6px;
-                                                cursor: pointer;
-                                                 max-width: 50%;
-                                            ">
-                                                <input 
-                                                    type="checkbox" 
-                                                    id="${fileId}" 
-                                                    value="${fileName}" 
-                                                    style="margin-right: 6px;"
-                                                />
-                                                <span title="${fileName}" style="max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                                                    ${fileName}
-                                                </span>
-                                                <a href="${fileUrl}" target="_blank" style="color: var(--accent-color); margin-left: 6px;">📄</a>
-                                            </label>
-                                        `;
-                                    });
-                                }
-
-                                referenceText += `</div></div>`;
-                                botResponseContent = responseText + referenceText;
-
-                                // Delay DOM binding
-                                setTimeout(() => {
-                                    const checkboxes = document.querySelectorAll('.bot-message input[type="checkbox"]');
-                                    checkboxes.forEach(checkbox => {
-                                        checkbox.addEventListener('change', (e) => {
-                                            const name = e.target.value;
-                                            if (e.target.checked) {
-                                                if (!this.selectedDocumentFiles.includes(name)) {
-                                                    this.selectedDocumentFiles.push(name);
-                                                }
-                                            } else {
-                                                this.selectedDocumentFiles = this.selectedDocumentFiles.filter(f => f !== name);
-                                            }
-                                            console.log("Selected file names:", this.selectedDocumentFiles.join(', '));
-                                            this.userInput.value = this.selectedDocumentFiles.join(', ');
-                                            this.sendButton.disabled = this.userInput.value.trim() === '';
-                                        });
-                                    });
-                                }, 100);
-                            }
-                        // "DOCUMENT_UPLOAD_LIST"
-                        } else if (data.type === "DOWNLOADABLE" && data.link) {
-                            console.log('in DOWNLOADABLE');
-                            // Handle downloadable link
-                            botResponseContent = `
-                                <div class="response-content">
-                                <img src='icons8-file-upload-51.png' alt='File Upload' style='width: 100px; height: 100px;margin-bottom: 2px'>
-                                <br/>
-                                <a href="${data.link}" style="color:white" target="_blank" class="response-download" download="${data.text || 'download'}">
-                                ${data.text.split("/").pop() || 'file'}
-                                    </a>
-                                </div>
-                            `;
-                        }
-
-                    
-                        // Handle media attachments in response
-                        if (data.attachments && data.attachments.length > 0) {
-                            data.attachments.forEach(attachment => {
-                                if (attachment.type.startsWith('image/')) {
-                                    botResponseContent += `
-                                        <div class="response-media">
-                                            <img src="${attachment.url}" alt="${attachment.name || 'Image'}">
-                                        </div>
-                                    `;
-                                } else if (attachment.type.startsWith('video/')) {
-                                    botResponseContent += `
-                                        <div class="response-media">
-                                            <video controls>
-                                                <source src="${attachment.url}" type="${attachment.type}">
-                                                Your browser does not support the video tag.
-                                            </video>
-                                        </div>
-                                    `;
-                                } else if (attachment.type.startsWith('audio/')) {
-                                    botResponseContent += `
-                                        <div class="response-media">
-                                            <audio controls>
-                                                <source src="${attachment.url}" type="${attachment.type}">
-                                                Your browser does not support the audio element.
-                                            </audio>
-                                        </div>
-                                    `;
-                                } else if (attachment.type === 'application/pdf') {
-                                    botResponseContent += `
-                                        <div class="response-content">
-                                            <a href="${attachment.url}" class="response-pdf" download="${attachment.name || 'document.pdf'}">
-                                                Download PDF: ${attachment.name || 'document.pdf'}
-                                            </a>
-                                        </div>
-                                    `;
-                                }
-                            });
-                        }
-
-                        // Check for HTML content in response
-                        if (data.htmlMenu) {
-                            botResponseContent += this.renderHtmlMenu(data.htmlMenu);
-                        }
-
-                        // Add feedback buttons
-                        botResponseContent += this.renderFeedbackButtons(messageId);
-
-                        botMessage.innerHTML = botResponseContent;
-                        botMessage.dataset.messageId = messageId;
-
-
-                        document.querySelectorAll('.menu-link').forEach(link => {
-                            if (!link._clickListenerAdded) { 
-                                link.addEventListener('click', (e) => {
-                                    const name = e.currentTarget.getAttribute('data-name');
-                                    this.userInput.value = name;
-                                    this.sendMessage();
-                                });
-                                link._clickListenerAdded = true;
-                            }
-                        });
-
-                        // Store the message data for feedback tracking
-                        this.messageFeedback[messageId] = {
-                            message: data,
-                            feedback: null
+                    if (isDocumentMode) {
+                        payload.properties = {
+                            documentId: localStorage.getItem('documentId'),
+                            type: 'MULTI_FILE',
+                            clientId: '2000003'
                         };
+                    }
+
+                    if (isDbMode) {
+                        payload.properties = {
+                            connectionId: selectedDbConnectionId,
+                            model: null
+                        };
+                    }
+
+                    const requestHeaders = {
+                        Authorization: 'Bearer ' + this.getsSecretKey(),
+                    };
+
+                    let requestBody;
+                    if (isDbMode) {
+                        requestHeaders['Content-Type'] = 'application/json';
+                        requestBody = JSON.stringify(payload);
                     } else {
+                        const formData = new FormData();
+                        formData.append('payload', JSON.stringify(payload));
+
+                        if (isApiMode) {
+                            if (this.uploadedFiles.length === 0) {
+                                const dummyContent = new Blob(['Hello, this is dummy file content'], { type: 'text/plain' });
+                                const dummyFile = new File([dummyContent], 'dummy.txt', { type: 'text/plain' });
+                                formData.append('files', dummyFile);
+                            } else {
+                                this.uploadedFiles.forEach(file => {
+                                    formData.append('files', file);
+                                });
+                            }
+                        }
+
+                        requestBody = formData;
+                    }
+
+                    let url = this.chatApiEndpoint;
+                    if (isDocumentMode) {
+                        url = this.docApiEndpoint;
+                    } else if (isDbMode) {
+                        url = this.dbChatApiEndpoint;
+                    }
+
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        body: requestBody,
+                        headers: requestHeaders
+                    });
+
+                    let data = null;
+                    const contentType = response.headers.get('content-type') || '';
+                    if (contentType.includes('application/json')) {
+                        data = await response.json();
+                    } else {
+                        const rawText = await response.text();
+                        try {
+                            data = JSON.parse(rawText);
+                        } catch (parseError) {
+                            const looksLikeHtml = rawText.trim().startsWith('<');
+                            throw new Error(looksLikeHtml
+                                ? 'Received HTML instead of JSON. Verify endpoint URL and auth token.'
+                                : 'Received non-JSON response from server.');
+                        }
+                    }
+
+                    if (!response.ok) {
+                        throw new Error((data && data.message) || `API request failed with status ${response.status}`);
+                    }
+
+                    if (!data) {
                         throw new Error('Invalid response format from API');
                     }
 
-                
+                    const messageId = data.uuId || this.generateMessageId();
+                    let botResponseContent = '';
+
+                    if (isDbMode) {
+                        botResponseContent = this.renderDbResponse(data);
+                    } else if (data.type === 'TEXT' && data.text) {
+                        botResponseContent = this.renderMarkdown(data.text);
+                    } else if (data.type === 'MENU') {
+                        botResponseContent = this.renderHtmlMenu(data.menu);
+                    } else if (data.choices && data.choices.length > 0 && data.choices[0].message) {
+                        botResponseContent = this.renderMarkdown(data.choices[0].message.content);
+                    } else if (data.type === 'COMPLEX' && data.complex) {
+                        if (data.complex.metaData.type === 'IMAGE' && data.complex.data && data.complex.data.length > 0) {
+                            botResponseContent = '<div class="response-images">';
+                            data.complex.data.forEach(image => {
+                                botResponseContent += `
+                                    <div class="response-media" style="margin-bottom: 20px;">
+                                        <img src="${image.link}" alt="${image.photographer || 'Image'}" style="display: block; max-width: 100%; height: auto; border-radius: 8px;">
+                                        <div style="margin-top: 5px; text-align: left; display: flex; align-items: center; gap: 7px;">
+                                            <p style="margin: 0;">${image.photographer || ''}</p>
+                                            <a href="javascript:void(0)" onclick="window.chatbot.forceDownloadImage('${image.link}', '${image.link.split('/').pop()}')" title="Download image" style="display: inline-flex; justify-content: center; align-items: center; margin-top: 6px; padding: 3px; border: 1px solid black; border-radius: 6px; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 1px 4px rgba(0,0,0,0.1);">
+                                                <svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" viewBox="0 0 24 24" fill="black" style="transform: rotate(180deg);">
+                                                    <path d="M5 20h14v-2H5v2zm7-18L5.33 9h4.34v6h4.66V9h4.34L12 2z"/>
+                                                </svg>
+                                            </a>
+                                        </div>
+                                    </div>
+                                `;
+                            });
+                            botResponseContent += '</div>';
+                        }
+
+                        if (data.complex.metaData.type === 'VIDEO' && data.complex.data && data.complex.data.length > 0) {
+                            botResponseContent = '<div class="response-videos">';
+                            data.complex.data.forEach(video => {
+                                botResponseContent += `
+                                    <div class="response-media" style="margin-bottom: 20px;">
+                                        <video controls style="display: block; max-width: 100%; height: auto; border-radius: 8px;">
+                                            <source src="${video.link}" type="video/mp4">
+                                            Your browser does not support the video tag.
+                                        </video>
+                                        <div style="margin-top: 5px; text-align: left; display: flex; align-items: center; gap: 7px;">
+                                            <p style="margin: 0;">${video.link.split('/').pop() || ''}</p>
+                                            <a href="javascript:void(0)" onclick="window.chatbot.forceDownloadImage('${video.link}', '${video.link.split('/').pop()}')" title="Download video" style="display: inline-flex; justify-content: center; align-items: center; margin-top: 6px; padding: 2px; border: 1px solid black; border-radius: 6px; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 1px 4px rgba(0,0,0,0.1);">
+                                                <svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" viewBox="0 0 24 24" fill="black" style="transform: rotate(180deg);">
+                                                    <path d="M5 20h14v-2H5v2zm7-18L5.33 9h4.34v6h4.66V9h4.34L12 2z"/>
+                                                </svg>
+                                            </a>
+                                        </div>
+                                    </div>
+                                `;
+                            });
+                            botResponseContent += '</div>';
+                        }
+
+                        if (data.complex.metaData.type === 'TEXT') {
+                            const responseText = this.renderMarkdown(data.complex.data.response);
+                            let referenceText = '';
+                            if (data.complex.data.documents && data.complex.data.documents.length > 0) {
+                                referenceText += '<div style="margin-top: 10px; font-size: 13px; color: gray;">Source(s):<br>';
+                                data.complex.data.documents.forEach(doc => {
+                                    const pages = doc.pages.join(', ');
+                                    referenceText += `&bull; <strong>${doc.fileName}</strong> (Pages: ${pages})<br>`;
+                                });
+                                referenceText += '</div>';
+                            }
+                            botResponseContent = responseText + referenceText;
+                        }
+
+                        if (data.complex.metaData.type === 'LIST') {
+                            botResponseContent = this.renderHtmlMenuFromList(data.complex.data, data.complex.metaData.message);
+                        }
+
+                        if (data.complex.metaData.type === 'DOCUMENT_UPLOAD_LIST') {
+                            const responseText = this.renderMarkdown(data.text || '');
+                            let referenceText = '<div style="margin-top: 10px; font-size: 13px; color: gray;"><strong>Uploaded Documents:</strong><br><div style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">';
+
+                            if (data.complex.data && data.complex.data.length > 0) {
+                                data.complex.data.forEach(doc => {
+                                    const fileId = this.generateMessageId();
+                                    referenceText += `
+                                        <label for="${fileId}" style="display: flex; align-items: center; background: var(--input-bg); color: var(--input-text); padding: 6px 10px; border-radius: 18px; font-size: 13px; border: 1px solid var(--border-color); gap: 6px; cursor: pointer; max-width: 50%;">
+                                            <input type="checkbox" id="${fileId}" value="${doc.fileName}" style="margin-right: 6px;" />
+                                            <span title="${doc.fileName}" style="max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${doc.fileName}</span>
+                                            <a href="${doc.fileUrl}" target="_blank" style="color: var(--accent-color); margin-left: 6px;">📄</a>
+                                        </label>
+                                    `;
+                                });
+                            }
+
+                            referenceText += '</div></div>';
+                            botResponseContent = responseText + referenceText;
+
+                            setTimeout(() => {
+                                const checkboxes = document.querySelectorAll('.bot-message input[type="checkbox"]');
+                                checkboxes.forEach(checkbox => {
+                                    checkbox.addEventListener('change', (e) => {
+                                        const name = e.target.value;
+                                        if (e.target.checked) {
+                                            if (!this.selectedDocumentFiles.includes(name)) {
+                                                this.selectedDocumentFiles.push(name);
+                                            }
+                                        } else {
+                                            this.selectedDocumentFiles = this.selectedDocumentFiles.filter(f => f !== name);
+                                        }
+                                        this.userInput.value = this.selectedDocumentFiles.join(', ');
+                                        this.updateSendButtonState();
+                                    });
+                                });
+                            }, 100);
+                        }
+                    } else if (data.type === 'DOWNLOADABLE' && data.link) {
+                        botResponseContent = `
+                            <div class="response-content">
+                                <img src='icons8-file-upload-51.png' alt='File Upload' style='width: 100px; height: 100px; margin-bottom: 2px'>
+                                <br/>
+                                <a href="${data.link}" style="color:white" target="_blank" class="response-download" download="${data.text || 'download'}">
+                                    ${(data.text || '').split('/').pop() || 'file'}
+                                </a>
+                            </div>
+                        `;
+                    }
+
+                    if (data.attachments && data.attachments.length > 0) {
+                        data.attachments.forEach(attachment => {
+                            if (attachment.type.startsWith('image/')) {
+                                botResponseContent += `<div class="response-media"><img src="${attachment.url}" alt="${attachment.name || 'Image'}"></div>`;
+                            } else if (attachment.type.startsWith('video/')) {
+                                botResponseContent += `<div class="response-media"><video controls><source src="${attachment.url}" type="${attachment.type}">Your browser does not support the video tag.</video></div>`;
+                            } else if (attachment.type.startsWith('audio/')) {
+                                botResponseContent += `<div class="response-media"><audio controls><source src="${attachment.url}" type="${attachment.type}">Your browser does not support the audio element.</audio></div>`;
+                            } else if (attachment.type === 'application/pdf') {
+                                botResponseContent += `<div class="response-content"><a href="${attachment.url}" class="response-pdf" download="${attachment.name || 'document.pdf'}">Download PDF: ${attachment.name || 'document.pdf'}</a></div>`;
+                            }
+                        });
+                    }
+
+                    if (data.htmlMenu) {
+                        botResponseContent += this.renderHtmlMenu(data.htmlMenu);
+                    }
+
+                    if (!botResponseContent) {
+                        botResponseContent = this.renderMarkdown(data.FormattedAnswer || data.text || 'No response content available.');
+                    }
+
+                    botResponseContent += this.renderFeedbackButtons(messageId);
+                    botMessage.innerHTML = botResponseContent;
+                    botMessage.dataset.messageId = messageId;
+
+                    document.querySelectorAll('.menu-link').forEach(link => {
+                        if (!link._clickListenerAdded) {
+                            link.addEventListener('click', (e) => {
+                                const name = e.currentTarget.getAttribute('data-name');
+                                this.userInput.value = name;
+                                this.sendMessage();
+                            });
+                            link._clickListenerAdded = true;
+                        }
+                    });
+
+                    this.messageFeedback[messageId] = {
+                        message: data,
+                        feedback: null
+                    };
+
                     this.assignEventListenersToFeedbackButtons();
-                    // Clear uploaded files after successful send
                     this.uploadedFiles = [];
                     this.fileUpload.value = '';
-
                     document.getElementById('chatbotFileList').innerHTML = '';
-
+                    this.updateSendButtonState();
                 } catch (error) {
                     console.error('API Error:', error);
-                    this.showError('Failed to get response from AI. Please try again.');
+                    this.showError(error.message || 'Failed to get response from AI. Please try again.');
                     botMessage.remove();
+                    this.updateSendButtonState();
                 }
             }
 
@@ -911,6 +1149,58 @@
                 });
 
                 html += '</ul></div>';
+                return html;
+            }
+
+            escapeHtml(value) {
+                return String(value)
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#39;');
+            }
+
+            renderDbResponse(data) {
+                let html = '<div class="db-response">';
+
+                if (data.Error) {
+                    html += `<div class="response-content" style="color: #d9534f; margin-bottom: 8px;"><strong>Error:</strong> ${this.escapeHtml(data.Error)}</div>`;
+                }
+
+                if (data.FormattedAnswer) {
+                    html += `<div class="response-content">${this.renderMarkdown(data.FormattedAnswer)}</div>`;
+                }
+
+                if (data.GeneratedSql) {
+                    html += `<pre style="margin-top: 10px; white-space: pre-wrap;"><code>${this.escapeHtml(data.GeneratedSql)}</code></pre>`;
+                }
+
+                if (Array.isArray(data.Columns) && Array.isArray(data.Rows) && data.Columns.length > 0) {
+                    html += '<div style="overflow-x: auto; margin-top: 10px;"><table style="width: 100%; border-collapse: collapse; font-size: 13px;">';
+                    html += '<thead><tr>';
+                    data.Columns.forEach(col => {
+                        html += `<th style="border: 1px solid var(--border-color); padding: 6px; text-align: left;">${this.escapeHtml(col)}</th>`;
+                    });
+                    html += '</tr></thead><tbody>';
+
+                    data.Rows.forEach(row => {
+                        html += '<tr>';
+                        data.Columns.forEach(col => {
+                            const value = row[col] == null ? '' : row[col];
+                            html += `<td style="border: 1px solid var(--border-color); padding: 6px;">${this.escapeHtml(value)}</td>`;
+                        });
+                        html += '</tr>';
+                    });
+
+                    html += '</tbody></table></div>';
+                }
+
+                if (typeof data.RowCount === 'number') {
+                    html += `<div style="margin-top: 8px; font-size: 12px; opacity: 0.8;">Rows: ${data.RowCount}</div>`;
+                }
+
+                html += '</div>';
                 return html;
             }
 
@@ -1142,9 +1432,83 @@
                     .catch(() => alert('Image download failed. Server may block CORS.'));
             }
 
+            toggleVoiceInput() {
+                this.isRecording = !this.isRecording;
+                if (this.isRecording) {
+                    this.startVoiceRecognition();
+                } else {
+                    this.stopVoiceRecognition();
+                }
+            }
+
+            startVoiceRecognition() {
+                if (!('webkitSpeechRecognition' in window)) {
+                    alert('Speech recognition not supported in this browser.');
+                    return;
+                }
+
+                this.speechRecognition = new webkitSpeechRecognition();
+                this.speechRecognition.continuous = false;
+                this.speechRecognition.interimResults = false;
+                this.speechRecognition.lang = 'en-US';
+
+                this.speechRecognition.onstart = () => {
+                    console.log('Voice recognition started');
+                    this.isRecording = true;
+                    this.voiceInputButton.classList.add('recording');
+                };
+
+                this.speechRecognition.onresult = (event) => {
+                    const transcript = event.results[0][0].transcript;
+                    console.log('Voice input:', transcript);
+                    this.userInput.value = transcript;
+                    this.sendMessage();
+                    this.stopVoiceRecognition();
+                };
+
+                this.speechRecognition.onerror = (event) => {
+                    console.error('Speech recognition error:', event);
+                    this.stopVoiceRecognition();
+                };
+
+                this.speechRecognition.onend = () => {
+                    console.log('Voice recognition ended');
+                    this.isRecording = false;
+                    this.voiceInputButton.classList.remove('recording');
+                };
+
+                this.speechRecognition.start();
+            }
+
+            stopVoiceRecognition() {
+                if (this.speechRecognition) {
+                    this.speechRecognition.stop();
+                    this.speechRecognition = null;
+                }
+            }
+
+            speakText(text) {
+                if (!this.speechSynthesis) return;
+
+                this.currentSpeech = new SpeechSynthesisUtterance(text);
+                this.currentSpeech.lang = 'en-US';
+                this.currentSpeech.volume = 1; // 0 to 1
+                this.currentSpeech.rate = 1; // Speed rate
+                this.currentSpeech.pitch = 1; // Pitch level
+
+                this.currentSpeech.onend = () => {
+                    console.log('Speech finished');
+                };
+
+                this.currentSpeech.onerror = (event) => {
+                    console.error('Speech synthesis error:', event);
+                };
+
+                this.speechSynthesis.speak(this.currentSpeech);
+            }
         }
 
-        // Initialize the chatbot5
+        // Initialize the chatbot
         const chatbot = new Chatbot();
         window.chatbot = chatbot;
     });

@@ -97,7 +97,7 @@
     </style>
 </head>
 <body class="bg-light">
-<div class="container py-5">
+<div class="container py-5" s>
     <div class="form-container shadow-lg rounded-4 bg-white p-4 mx-auto" style="max-width: 540px;">
         <h2 class="mb-4 text-center fw-bold text-primary">User Information</h2>
         <form id="userForm">
@@ -151,6 +151,12 @@
                     <input type="text" class="form-control" id="location" required>
                 </div>
             </div>
+            <div class="row g-3 mb-3">
+                <div class="col-md-12">
+                    <label for="apiBaseUrl" class="form-label">Base URL (optional)</label>
+                    <input type="url" class="form-control" id="apiBaseUrl" placeholder="https://13.232.238.31/v2/api">
+                </div>
+            </div>
             <div class="row g-3 mb-4">
                 <div class="col-md-6">
                     <label for="coordinates" class="form-label">GPS Coordinates</label>
@@ -158,7 +164,7 @@
                 </div>
                 <div class="col-md-6">
                     <label for="profile" class="form-label">Profile</label>
-                    <select id="profile" class="form-select" required>
+                    <select id="profile" class="form-select">
                         <option value="">Select environment</option>
                         <option value="uat">UAT</option>
                         <option value="dev">DEV</option>
@@ -200,6 +206,26 @@
         });
     });
 
+    const profileSelect = document.getElementById('profile');
+    const apiBaseUrlInput = document.getElementById('apiBaseUrl');
+
+    apiBaseUrlInput.addEventListener('input', function() {
+        const hasBaseUrl = apiBaseUrlInput.value.trim() !== '';
+        if (hasBaseUrl) {
+            profileSelect.value = '';
+            profileSelect.disabled = true;
+        } else {
+            profileSelect.disabled = false;
+        }
+    });
+
+    profileSelect.addEventListener('change', function() {
+        if (profileSelect.value) {
+            apiBaseUrlInput.value = '';
+        }
+        profileSelect.disabled = false;
+    });
+
     document.getElementById('userForm').addEventListener('submit', function(e) {
         e.preventDefault();
 
@@ -212,10 +238,21 @@
         const sKey = document.getElementById('sKey').value;
         const token = document.getElementById('token').value;
         const profile = document.getElementById('profile').value;
+        const apiBaseUrl = document.getElementById('apiBaseUrl').value.trim();
         const company = document.getElementById('companyName').value;
         const roleId = document.getElementById('roleId').value;
         const location = document.getElementById('location').value;
         const coordinates = document.getElementById('coordinates').value;
+
+        if (apiBaseUrl !== '' && profile !== '') {
+            alert('Use either Base URL or Profile. If Base URL is filled, Profile must be empty.');
+            return;
+        }
+
+        if (apiBaseUrl === '' && profile === '') {
+            alert('Please provide either Base URL or Profile.');
+            return;
+        }
 
         // Store in localStorage
         localStorage.setItem('isLoggedIn', 'true');
@@ -226,7 +263,15 @@
         localStorage.setItem('sid', sid);
         localStorage.setItem('bai-sk', sKey);
         localStorage.setItem('jwt', token);
-        localStorage.setItem('profile', profile);
+        if (apiBaseUrl !== '') {
+            localStorage.setItem('apiBaseUrl', apiBaseUrl);
+            localStorage.setItem('dbApiBaseUrl', apiBaseUrl);
+            localStorage.setItem('profile', '');
+        } else {
+            localStorage.removeItem('apiBaseUrl');
+            localStorage.removeItem('dbApiBaseUrl');
+            localStorage.setItem('profile', profile);
+        }
         localStorage.setItem('company', company);
         localStorage.setItem('roleId', roleId);
         localStorage.setItem('location', location);
