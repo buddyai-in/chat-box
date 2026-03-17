@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BuddyAI (OSource) - Intelligent Chat Companion</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #23074d, #cc5333);
+      color: white;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 60px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo img {
+      width: 40px;
+    }
+
+    nav a {
+      color: #ffffffcc;
+      text-decoration: none;
+      margin: 0 15px;
+      font-weight: 500;
+    }
+
+    nav a:hover {
+      color: white;
+    }
+
+    .container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 40px 60px;
+    }
+
+    .content {
+      max-width: 600px;
+    }
+
+    .content h1 {
+      font-size: 48px;
+      margin-bottom: 20px;
+    }
+
+    .content h1 span {
+      font-weight: 300;
+    }
+
+    .content p {
+      font-size: 18px;
+      color: #dddddd;
+    }
+
+    .buttons {
+      margin-top: 30px;
+    }
+
+    .buttons button {
+      background: #6a00ff;
+      color: white;
+      padding: 14px 26px;
+      font-size: 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-right: 15px;
+    }
+
+    .buttons button:hover {
+      background-color: #5300d6;
+    }
+
+    .features {
+      margin-top: 15px;
+      color: #ccccff;
+      font-size: 14px;
+    }
+
+    .features span {
+      margin-right: 20px;
+    }
+
+    .robot-section {
+      position: relative;
+    }
+
+    .robot-img {
+      width: 620px;
+      z-index: 2;
+    }
+
+    .bubble {
+      position: absolute;
+      top: 10px;
+      right: 20px;
+      background-color: #9276f8;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 10px;
+      font-size: 14px;
+      max-width: 200px;
+    }
+
+    .user-bubble {
+      position: absolute;
+      bottom: 30px;
+      left: -180px;
+      background-color: #00c8ff;
+      padding: 10px 15px;
+      border-radius: 10px;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      max-width: 240px;
+    }
+
+    .user-bubble img {
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      margin-left: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo">
+      <img src="./buddyAi_v1.jpeg" alt="BuddyAI Logo">
+      <h2>BuddyAI - OSource</h2>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="content">
+      <p>AI ASSISTED BOT</p>
+      <h1>Your <span>Intelligent</span><br><strong>Chat Companion</strong></h1>
+      <p>Making data and system accessible</p>
+      <div class="buttons">
+        <button id="btn-open-storage" onclick="window.open('local-storage.html', '_blank')">Open Local Storage</button>
+      </div>
+      <div class="features">
+        <span>✅ Full access to our software</span>
+        <span>✅ Cancel at any time</span>
+      </div>
+    </div>
+
+    <div class="robot-section">
+      <img class="robot-img" src="./banner1.png" alt="AI Robot" />
+    </div>
+  </div>
+
+  <script src="/chat-box/os/chat-widget.js"></script>
+   <script>
+    localStorage.setItem('isLoggedIn', "true");
+  
+  </script>
+
+</body>
+</html>

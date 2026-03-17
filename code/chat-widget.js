@@ -1328,7 +1328,7 @@
                                 }
                             });
                         });
-            
+
                     }, 100);
                 }
 
@@ -1417,6 +1417,22 @@
             }
 
             forceDownloadImage(url, filename) {
+            // Check if URL is a base64 data URL
+            if (url.startsWith('data:')) {
+                try {
+                    // Extract the base64 data and convert to blob
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = filename;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                } catch (error) {
+                    console.error('Download failed:', error);
+                    alert('File download failed.');
+                }
+            } else {
+                // Handle regular URLs with fetch
                 fetch(url, { mode: 'cors' })
                     .then(res => res.blob())
                     .then(blob => {
@@ -1431,6 +1447,7 @@
                     })
                     .catch(() => alert('Image download failed. Server may block CORS.'));
             }
+        }
 
             toggleVoiceInput() {
                 this.isRecording = !this.isRecording;
