@@ -650,17 +650,31 @@
                     this.dbConnectionWrapper.classList.toggle('hidden', !isDbMode);
                 }
 
+                if (this.defaultPrompt) {
+                    this.defaultPrompt.style.display = isDbMode ? 'none' : 'block';
+                    this.defaultPrompt.disabled = isDbMode;
+                }
+
                 if (isDbMode) {
                     this.fetchDbConnections();
                 }
 
+                this.toggleSendVoiceButton();
                 this.updateSendButtonState();
+            }
+
+            getActiveDefaultPromptText() {
+                if (!this.defaultPrompt || this.currentChatMode === 'DB') {
+                    return '';
+                }
+
+                return this.defaultPrompt.value.trim();
             }
 
             updateSendButtonState() {
                 if (!this.sendButton) return;
 
-                const hasContent = this.userInput.value.trim() !== '' || this.uploadedFiles.length > 0 || this.defaultPrompt.value.trim() !== '';
+                const hasContent = this.userInput.value.trim() !== '' || this.uploadedFiles.length > 0 || this.getActiveDefaultPromptText() !== '';
                 const hasDbConnection = this.currentChatMode !== 'DB' || !!this.getSelectedDbConnectionId();
                 const dbReady = this.currentChatMode !== 'DB' || (!this.isDbConnectionsLoading && hasDbConnection);
 
@@ -803,7 +817,7 @@
             toggleSendVoiceButton() {
                 const hasText = this.userInput.value.trim() !== '' ||
                                this.uploadedFiles.length > 0 ||
-                               this.defaultPrompt.value.trim() !== '';
+                               this.getActiveDefaultPromptText() !== '';
 
                 if (hasText) {
                     // Show send button, hide voice button
@@ -936,7 +950,7 @@
 
             async sendMessage() {
                 let userText = this.userInput.value.trim();
-                let df = this.defaultPrompt.value.trim();
+                let df = this.getActiveDefaultPromptText();
 
                 if (userText === '' && this.uploadedFiles.length === 0 && df === '') return;
 

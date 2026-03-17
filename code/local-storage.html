@@ -104,37 +104,37 @@
             <div class="row g-3 mb-3">
                 <div class="col-md-6">
                     <label for="userId" class="form-label">User ID</label>
-                    <input type="text" class="form-control" id="userId" required>
+                    <input type="text" class="form-control" id="userId" value="PS123" required>
                 </div>
                 <div class="col-md-6">
                     <label for="userName" class="form-label">User Name</label>
-                    <input type="text" class="form-control" id="userName" required>
+                    <input type="text" class="form-control" id="userName" value="PS123" required>
                 </div>
             </div>
             <div class="row g-3 mb-3">
                 <div class="col-md-6">
                     <label for="companyName" class="form-label">Company Name</label>
-                    <input type="text" class="form-control" id="companyName" required>
+                    <input type="text" class="form-control" id="companyName" value="Osource" required>
                 </div>
                 <div class="col-md-6">
                     <label for="apiKey" class="form-label">API Key</label>
-                    <input type="text" class="form-control" id="apiKey" required>
+                    <input type="text" class="form-control" id="apiKey" value="PS123" required>
                 </div>
             </div>
             <div class="row g-3 mb-3">
                 <div class="col-md-6">
                     <label for="documentId" class="form-label">Document ID</label>
-                    <input type="text" class="form-control" id="documentId" required>
+                    <input type="text" class="form-control" id="documentId" value="1" required>
                 </div>
                 <div class="col-md-6">
                     <label for="sid" class="form-label">Secret Id</label>
-                    <input type="text" class="form-control" id="sid" required>
+                    <input type="text" class="form-control" id="sid" value="PRqa55Js4bRqs-Vcj20HqA" required>
                 </div>
             </div>
             <div class="row g-3 mb-3">
                 <div class="col-md-6">
                     <label for="sKey" class="form-label">Secret Key</label>
-                    <input type="text" class="form-control" id="sKey" required>
+                    <input type="text" class="form-control" id="sKey" value="sk_7J-vQR2q56OUI-uG9p-KkwlA_1WoM0oKTUdWOxn8q9w" required>
                 </div>
                 <div class="col-md-6">
                     <label for="token" class="form-label">Token</label>
@@ -144,7 +144,7 @@
             <div class="row g-3 mb-3">
                 <div class="col-md-6">
                     <label for="roleId" class="form-label">Role Id</label>
-                    <input type="text" class="form-control" id="roleId" required>
+                    <input type="text" class="form-control" id="roleId" value="1" required>
                 </div>
                 <div class="col-md-6">
                     <label for="location" class="form-label">GPS Location</label>
@@ -154,7 +154,7 @@
             <div class="row g-3 mb-3">
                 <div class="col-md-12">
                     <label for="apiBaseUrl" class="form-label">Base URL (optional)</label>
-                    <input type="url" class="form-control" id="apiBaseUrl" placeholder="https://13.232.238.31/v2/api">
+                    <input type="url" class="form-control" id="apiBaseUrl" value="https://13.232.238.31/" placeholder="https://13.232.238.31/v2/api">
                 </div>
             </div>
             <div class="row g-3 mb-4">
@@ -209,7 +209,7 @@
     const profileSelect = document.getElementById('profile');
     const apiBaseUrlInput = document.getElementById('apiBaseUrl');
 
-    apiBaseUrlInput.addEventListener('input', function() {
+    function syncBaseUrlProfileState() {
         const hasBaseUrl = apiBaseUrlInput.value.trim() !== '';
         if (hasBaseUrl) {
             profileSelect.value = '';
@@ -217,6 +217,10 @@
         } else {
             profileSelect.disabled = false;
         }
+    }
+
+    apiBaseUrlInput.addEventListener('input', function() {
+        syncBaseUrlProfileState();
     });
 
     profileSelect.addEventListener('change', function() {
@@ -225,6 +229,8 @@
         }
         profileSelect.disabled = false;
     });
+
+    syncBaseUrlProfileState();
 
     document.getElementById('userForm').addEventListener('submit', function(e) {
         e.preventDefault();
