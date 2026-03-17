@@ -1078,6 +1078,9 @@
                         requestBody = formData;
                     }
 
+                    // Close non-DB request-body preparation block
+                    }
+
                     let url = this.chatApiEndpoint;
                     if (isDocumentMode) {
                         url = this.docApiEndpoint;
@@ -1118,17 +1121,10 @@
                     const messageId = data.uuId || this.generateMessageId();
                     let botResponseContent = '';
 
-                        // Handle audio/voice response
-                        if (data.voiceResponse && data.audioResponse) {
-                            // Display text response
-                            botResponseContent = this.renderMarkdown(data.text || 'Audio response');
-
-                            // Add audio player with controls
-                            botResponseContent += this.createAudioPlayer(data.audioResponse, messageId);
-
-                        } else if (data.type === "TEXT" && data.text && this.apiMode == true) {
-                            // Text response
-                    if (isDbMode) {
+                    if (data.voiceResponse && data.audioResponse) {
+                        botResponseContent = this.renderMarkdown(data.text || 'Audio response');
+                        botResponseContent += this.createAudioPlayer(data.audioResponse, messageId);
+                    } else if (isDbMode) {
                         botResponseContent = this.renderDbResponse(data);
                     } else if (data.type === 'TEXT' && data.text) {
                         botResponseContent = this.renderMarkdown(data.text);
@@ -1198,17 +1194,6 @@
                             botResponseContent = this.renderHtmlMenuFromList(data.complex.data, data.complex.metaData.message);
                         }
 
-                            // "DOCUMENT_UPLOAD_LIST"
-
-                            if (data.complex.metaData.type === "DOCUMENT_UPLOAD_LIST") { 
-                                console.log('in "DOCUMENT_UPLOAD_LIST"');
-
-                                const responseText ='';
-                              let referenceText = `
-                                    <div style="margin-top: 10px; font-size: 13px; color: gray;">
-                                        <strong>Uploaded Documents:</strong><br>
-                                        <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
-                                `;
                         if (data.complex.metaData.type === 'DOCUMENT_UPLOAD_LIST') {
                             const responseText = this.renderMarkdown(data.text || '');
                             let referenceText = '<div style="margin-top: 10px; font-size: 13px; color: gray;"><strong>Uploaded Documents:</strong><br><div style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">';
@@ -1253,7 +1238,6 @@
                                 <img src='icons8-file-upload-51.png' alt='File Upload' style='width: 100px; height: 100px; margin-bottom: 2px'>
                                 <br/>
                                 <a href="${data.link}" style="color:white" target="_blank" class="response-download" download="${data.text || 'download'}">
-                                Click Here To Download
                                     ${(data.text || '').split('/').pop() || 'file'}
                                 </a>
                             </div>
