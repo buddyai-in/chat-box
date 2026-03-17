@@ -1280,7 +1280,6 @@
                         botResponseContent = this.renderMarkdown(data.FormattedAnswer || data.text || 'No response content available.');
                     }
 
-                        botResponseContent += this.renderFeedbackButtons(messageId);
                     botResponseContent += this.renderFeedbackButtons(messageId);
                     botMessage.innerHTML = botResponseContent;
                     botMessage.dataset.messageId = messageId;
