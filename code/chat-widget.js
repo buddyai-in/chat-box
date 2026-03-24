@@ -1067,23 +1067,22 @@
 
                     let requestBody;
                     if (isDbMode) {
+                        // DB mode: always send JSON
                         requestHeaders['Content-Type'] = 'application/json';
                         requestBody = JSON.stringify(payload);
-                    } else {
+                    } else if (isDocumentMode || this.uploadedFiles.length > 0) {
+                        // Document mode OR API mode with uploaded files: send multipart/form-data
                         const formData = new FormData();
                         formData.append('payload', JSON.stringify(payload));
-
-                        if (this.uploadedFiles.length === 0) {
-                            const dummyContent = new Blob(['Hello, this is dummy file content'], { type: 'text/plain' });
-                            const dummyFile = new File([dummyContent], 'dummy.txt', { type: 'text/plain' });
-                            formData.append('files', dummyFile);
-                        } else {
-                            this.uploadedFiles.forEach(file => {
-                                formData.append('files', file);
-                            });
-                        }
-
+                        this.uploadedFiles.forEach(file => {
+                            formData.append('files', file);
+                        });
+                        // No Content-Type header — browser sets it automatically with boundary
                         requestBody = formData;
+                    } else {
+                        // API mode without files: send plain JSON
+                        requestHeaders['Content-Type'] = 'application/json';
+                        requestBody = JSON.stringify(payload);
                     }
 
 
@@ -2229,7 +2228,7 @@
                             // Add audio player with controls
                             botResponseContent += this.createAudioPlayer(data.audioResponse, messageId);
 
-                        } else if (data.type === "TEXT" && data.text && this.apiMode == true) {
+                        } else if (data.type === "TEXT" && data.text) {
                             // Text response
                             botResponseContent = this.renderMarkdown(data.text);
                         } else if (data.type === "MENU") {
