@@ -1073,27 +1073,19 @@
                         const formData = new FormData();
                         formData.append('payload', JSON.stringify(payload));
 
-                    // Convert text to speech automatically in background
-                    this.convertTextToSpeechAndSend(userTextForVoice, payload);
-
-                    if (this.apiMode) {
-                        if (isApiMode) {
-                            if (this.uploadedFiles.length === 0) {
-                                const dummyContent = new Blob(['Hello, this is dummy file content'], { type: 'text/plain' });
-                                const dummyFile = new File([dummyContent], 'dummy.txt', { type: 'text/plain' });
-                                formData.append('files', dummyFile);
-                            } else {
-                                this.uploadedFiles.forEach(file => {
-                                    formData.append('files', file);
-                                });
-                            }
+                        if (this.uploadedFiles.length === 0) {
+                            const dummyContent = new Blob(['Hello, this is dummy file content'], { type: 'text/plain' });
+                            const dummyFile = new File([dummyContent], 'dummy.txt', { type: 'text/plain' });
+                            formData.append('files', dummyFile);
+                        } else {
+                            this.uploadedFiles.forEach(file => {
+                                formData.append('files', file);
+                            });
                         }
 
                         requestBody = formData;
                     }
 
-                    // Close non-DB request-body preparation block
-                    }
 
                     let url = this.chatApiEndpoint;
                     if (isDocumentMode) {
@@ -1628,48 +1620,8 @@
                 this.messagesContainer.appendChild(messageDiv);
                 this.scrollToBottom();
 
-                // Add feedback button handlers for bot messages
-                if (sender === 'bot') {
-                    setTimeout(() => {
-                        const positiveButtons = messageDiv.querySelectorAll('.feedback-button.positive');
-                        const negativeButtons = messageDiv.querySelectorAll('.feedback-button.negative');
-
-                        positiveButtons.forEach(button => {
-                            button.addEventListener('click', (e) => {
-                                const messageId = button.dataset.messageId;
-                                this.sendFeedback(messageId, true);
-                            });
-                        });
-
-                        negativeButtons.forEach(button => {
-                            button.addEventListener('click', (e) => {
-                                const messageId = button.dataset.messageId;
-                                this.sendFeedback(messageId, false);
-                            });
-                        });
-
-                    const copyButtons = messageDiv.querySelectorAll('.feedback-button.copy');
-                        console.log('copyButtons', positiveButtons);
-                        copyButtons.forEach(button => {
-                            button.addEventListener('click', () => {
-                                const parentMessage = button.closest('.message');
-                                const textToCopy = parentMessage?.innerText || '';
-                                if (textToCopy) {
-                                    navigator.clipboard.writeText(textToCopy).then(() => {
-                                        this.showCopyMsg("Copied!");
-                                        setTimeout(() => {
-                                            this.clearCopyMsg();
-                                        }, 2000);
-                                    }
-                                ).catch(err => {
-                                        console.error("Failed to copy text:", err);
-                                    });
-                                }
-                            });
-                        });
-            
-                    }, 100);
-                }
+                // Feedback button handlers are managed by assignEventListenersToFeedbackButtons()
+                // which is called after every API response to avoid duplicate handlers.
 
                 return messageDiv;
             }
